@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virtual Cuíca Drum - Brazilian Carnival Studio</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&family=Bebas+Neue&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        samba: {
+                            green: '#009b3a',
+                            yellow: '#fed100',
+                            blue: '#002776',
+                            brass: '#d4af37',
+                            wood: '#8b4513'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        display: ['Bebas Neue', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #0f172a, #020617);
+            color: #f8fafc;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        .preset-btn.active {
+            border-color: #fed100 !important;
+            background-color: rgba(254, 209, 0, 0.15) !important;
+            color: #fed100 !important;
+            box-shadow: 0 0 12px rgba(254, 209, 0, 0.3);
+        }
+        .btn-samba {
+            background: linear-gradient(135deg, #fed100, #d4af37);
+            color: #000;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        .btn-samba:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(254, 209, 0, 0.4);
+        }
+        .btn-samba:active {
+            transform: translateY(1px);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #fed100;
+            border-radius: 3px;
+        }
+        canvas {
+            touch-action: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden font-sans">
+
+    <!-- Start Overlay for Audio Context Unlock -->
+    <div id="audioUnlockOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-6 text-center transition-opacity duration-300">
+        <div class="max-w-md bg-slate-900 border border-yellow-500/30 p-8 rounded-3xl shadow-2xl space-y-5">
+            <div class="w-20 h-20 mx-auto rounded-full bg-gradient-to-tr from-samba-green via-samba-yellow to-samba-blue flex items-center justify-center text-slate-950 text-4xl font-bold shadow-lg animate-bounce">
+                <i class="fa-solid fa-drum"></i>
+            </div>
+            <div>
+                <h2 class="font-display text-4xl tracking-wide text-samba-yellow">CUÍCA STUDIO PRO</h2>
+                <p class="text-xs text-slate-400 mt-1">Wide Range Motion & Musical Pitch Scratch Engine</p>
+            </div>
+            <p class="text-sm text-slate-300 leading-relaxed">
+                Rub and scratch back-and-forth across the canvas! Move closer/further from the drum center to smoothly bend pitch up to 2 octaves across musical notes (C3 to C5+).
+            </p>
+            <button id="unlockAudioBtn" class="w-full btn-samba py-3 rounded-2xl text-base font-bold shadow-lg flex items-center justify-center gap-2">
+                <i class="fa-solid fa-power-off"></i>
+                <span>START SCRATCH STUDIO</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <header class="w-full bg-slate-900/80 backdrop-blur border-b border-yellow-500/20 px-4 py-3 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-samba-green via-samba-yellow to-samba-blue flex items-center justify-center text-slate-950 text-xl font-bold shadow-lg">
+                    <i class="fa-solid fa-drum"></i>
+                </div>
+                <div>
+                    <h1 class="font-display text-2xl md:text-3xl tracking-wide bg-gradient-to-r from-samba-yellow via-green-400 to-yellow-200 bg-clip-text text-transparent leading-none">
+                        CUÍCA SAMBA STUDIO
+                    </h1>
+                    <p class="text-xs text-slate-400">Bidirectional Motion & Expressive Musical Pitch Synthesizer</p>
+                </div>
+            </div>
+
+            <!-- Quick Status & Controls -->
+            <div class="flex items-center gap-3">
+                <span id="audioStatusBadge" class="text-xs px-3 py-1.5 rounded-xl bg-red-950/80 text-red-400 border border-red-800 flex items-center gap-2 font-mono">
+                    <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                    <span>Audio Muted</span>
+                </span>
+                <button id="helpModalBtn" class="bg-slate-800 hover:bg-slate-700 text-yellow-400 border border-yellow-500/30 px-3 py-2 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-circle-question"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left Panel: Preset Select, Sound Tweak, Rhythm Accompaniment -->
+        <section class="lg:col-span-3 space-y-4 order-2 lg:order-1">
+            
+            <!-- Shell Presets Switcher -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <h2 class="text-sm font-bold text-samba-yellow uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-xs"></i> Acoustic Presets
+                </h2>
+                
+                <div class="grid grid-cols-1 gap-2">
+                    <button data-preset="brass" class="preset-btn active bg-slate-800/80 hover:bg-slate-700 text-xs py-2.5 px-3 rounded-xl border border-slate-700 text-slate-300 font-medium transition text-left flex justify-between items-center">
+                        <span><i class="fa-solid fa-drum text-amber-400 mr-2"></i> Traditional Brass</span>
+                        <span class="text-[10px] text-samba-yellow font-mono">A3 Key</span>
+                    </button>
+                    <button data-preset="deepWood" class="preset-btn bg-slate-800/80 hover:bg-slate-700 text-xs py-2.5 px-3 rounded-xl border border-slate-700 text-slate-300 font-medium transition text-left flex justify-between items-center">
+                        <span><i class="fa-solid fa-tree text-amber-700 mr-2"></i> Deep Wooden Shell</span>
+                        <span class="text-[10px] text-samba-yellow font-mono">D3 Key</span>
+                    </button>
+                    <button data-preset="tight" class="preset-btn bg-slate-800/80 hover:bg-slate-700 text-xs py-2.5 px-3 rounded-xl border border-slate-700 text-slate-300 font-medium transition text-left flex justify-between items-center">
+                        <span><i class="fa-solid fa-circle-notch text-yellow-300 mr-2"></i> Sharp High Squeak</span>
+                        <span class="text-[10px] text-samba-yellow font-mono">E4 Key</span>
+                    </button>
+                    <button data-preset="samba" class="preset-btn bg-slate-800/80 hover:bg-slate-700 text-xs py-2.5 px-3 rounded-xl border border-slate-700 text-slate-300 font-medium transition text-left flex justify-between items-center">
+                        <span><i class="fa-solid fa-masks-theater text-emerald-400 mr-2"></i> Carnival Solo</span>
+                        <span class="text-[10px] text-samba-yellow font-mono">C4 Key</span>
+                    </button>
+                    <button data-preset="electric" class="preset-btn bg-slate-800/80 hover:bg-slate-700 text-xs py-2.5 px-3 rounded-xl border border-slate-700 text-slate-300 font-medium transition text-left flex justify-between items-center">
+                        <span><i class="fa-solid fa-bolt text-cyan-400 mr-2"></i> Electronic Samba Synth</span>
+                        <span class="text-[10px] text-samba-yellow font-mono">F#3 Key</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Fine Acoustic Tuning -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3">
+                <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-wrench text-xs text-samba-yellow"></i> Custom Musical Tuning
+                </h2>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-400">Fundamental Base Note</span>
+                        <span id="baseNoteVal" class="text-samba-yellow font-mono font-bold">A3 (220 Hz)</span>
+                    </div>
+                    <input type="range" id="basePitchSlider" min="36" max="72" step="1" value="57" class="w-full accent-yellow-400 bg-slate-800 rounded-lg cursor-pointer h-2">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-400">Pitch Bend Range</span>
+                        <span id="bendRangeVal" class="text-samba-yellow font-mono">+2 Octaves (+24 Semi)</span>
+                    </div>
+                    <input type="range" id="bendRangeSlider" min="12" max="36" step="1" value="24" class="w-full accent-yellow-400 bg-slate-800 rounded-lg cursor-pointer h-2">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-400">Filter Resonance (Q)</span>
+                        <span id="resVal" class="text-samba-yellow font-mono">8.0</span>
+                    </div>
+                    <input type="range" id="resSlider" min="1" max="25" step="0.5" value="8" class="w-full accent-yellow-400 bg-slate-800 rounded-lg cursor-pointer h-2">
+                </div>
+
+                <div>
+                    <div class="flex justify-between text-xs mb-1">
+                        <span class="text-slate-400">Stick Friction Scratch</span>
+                        <span id="noiseGainVal" class="text-samba-yellow font-mono">35%</span>
+                    </div>
+                    <input type="range" id="noiseGainSlider" min="0" max="100" step="5" value="35" class="w-full accent-yellow-400 bg-slate-800 rounded-lg cursor-pointer h-2">
+                </div>
+            </div>
+
+            <!-- Backing Track / Samba Rhythm Engine -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-green-400 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-compact-disc text-xs"></i> Samba Groove Loop
+                    </h2>
+                    <span id="sambaStatus" class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full uppercase">Stopped</span>
+                </div>
+
+                <div class="flex items-center gap-2 mb-3">
+                    <button id="toggleSambaBtn" class="flex-1 bg-green-600 hover:bg-green-500 text-slate-950 font-bold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md">
+                        <i class="fa-solid fa-play" id="sambaIcon"></i>
+                        <span id="sambaText">Start Samba Groove</span>
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Tempo (BPM)</span>
+                            <span id="bpmVal" class="text-green-400 font-mono font-bold">104</span>
+                        </div>
+                        <input type="range" id="bpmSlider" min="70" max="145" value="104" class="w-full accent-green-400 bg-slate-800 rounded-lg cursor-pointer h-2">
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Pattern Style</span>
+                        </div>
+                        <select id="grooveSelect" class="w-full bg-slate-800 text-xs text-slate-200 border border-slate-700 rounded-lg p-2 focus:outline-none focus:border-green-500">
+                            <option value="batucada">Rio Batucada Full</option>
+                            <option value="pagode">Pagode Groove</option>
+                            <option value="surdo">Surdo & Agogô Only</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-300">Groove Volume</span>
+                            <span id="sambaVolVal" class="text-green-400 font-mono">60%</span>
+                        </div>
+                        <input type="range" id="sambaVolSlider" min="0" max="100" value="60" class="w-full accent-green-400 bg-slate-800 rounded-lg cursor-pointer h-2">
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Center Panel: Interactive Cuíca Visualizer Canvas -->
+        <section class="lg:col-span-6 flex flex-col items-center space-y-4 order-1 lg:order-2">
+            
+            <!-- Interactive Drum Display -->
+            <div class="relative w-full bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 border border-slate-800 rounded-3xl p-4 shadow-2xl flex flex-col items-center overflow-hidden">
+                
+                <!-- Status Banner Overlay -->
+                <div class="w-full flex justify-between items-center mb-2 px-2 text-xs">
+                    <div class="flex items-center gap-2">
+                        <span id="activeDot" class="inline-block w-2.5 h-2.5 rounded-full bg-slate-600"></span>
+                        <span id="pressureIndicator" class="text-slate-300 font-mono">Note: A3 (+0.0 Semi)</span>
+                    </div>
+                    <div class="flex items-center gap-3 font-mono">
+                        <span id="strokeDirectionDisplay" class="text-slate-400">Stroke: IDLE</span>
+                        <span id="frictionSpeedDisplay" class="text-yellow-400">Velocity: 0.0</span>
+                    </div>
+                </div>
+
+                <!-- Canvas Component -->
+                <div class="relative w-full aspect-square max-w-[450px] flex items-center justify-center">
+                    <canvas id="cuicaCanvas" width="500" height="500" class="w-full h-full cursor-grab active:cursor-grabbing rounded-full shadow-inner"></canvas>
+                    
+                    <!-- Touch Guidance Overlay -->
+                    <div id="canvasOverlayHint" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-500 bg-black/40 rounded-full p-6 text-center">
+                        <i class="fa-solid fa-arrows-up-down-left-right text-4xl text-samba-yellow mb-2 animate-bounce"></i>
+                        <p class="text-sm font-bold text-white">SCRATCH IN ALL DIRECTIONS</p>
+                        <p class="text-xs text-slate-300 max-w-[240px] mt-1">Drag back-and-forth across the drum! Move closer/further from center to smoothly shift pitch up to +2 octaves!</p>
+                    </div>
+                </div>
+
+                <!-- Motion Speed Meter & Waveform Canvas -->
+                <div class="w-full mt-4 space-y-2">
+                    <div class="w-full bg-slate-950/80 rounded-lg p-1.5 border border-slate-800 flex items-center gap-2">
+                        <span class="text-[10px] text-slate-400 font-mono">MOTION:</span>
+                        <div class="flex-1 bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="motionBar" class="bg-gradient-to-r from-green-500 via-yellow-400 to-red-500 h-full w-0 transition-all duration-75"></div>
+                        </div>
+                    </div>
+
+                    <div class="w-full bg-slate-950 border border-slate-800 rounded-2xl p-2 h-16 flex items-center justify-center relative overflow-hidden">
+                        <canvas id="waveformCanvas" class="w-full h-full block"></canvas>
+                        <div class="absolute right-3 top-2 text-[10px] text-slate-500 font-mono">AUDIO SPECTRUM</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- On-Screen Keyboard / Pad Controller -->
+            <div class="w-full bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-keyboard text-samba-yellow"></i> Keyboard Controls
+                    </h3>
+                    <span class="text-[10px] text-slate-400">Hold key to sound</span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                    <button id="keyPad-Space" class="key-card bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl p-2 transition flex flex-col items-center">
+                        <kbd class="px-2 py-1 bg-slate-700 text-yellow-300 rounded font-mono text-xs font-bold shadow mb-1">SPACE / J</kbd>
+                        <span class="text-[11px] text-slate-200 font-medium">High Squeak</span>
+                        <span class="text-[9px] text-slate-400">Tight Pressure</span>
+                    </button>
+
+                    <button id="keyPad-KeyS" class="key-card bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl p-2 transition flex flex-col items-center">
+                        <kbd class="px-2 py-1 bg-slate-700 text-yellow-300 rounded font-mono text-xs font-bold shadow mb-1">DOWN / K</kbd>
+                        <span class="text-[11px] text-slate-200 font-medium">Low Groan</span>
+                        <span class="text-[9px] text-slate-400">Open Skin</span>
+                    </button>
+
+                    <button id="keyPad-KeyA" class="key-card bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl p-2 transition flex flex-col items-center">
+                        <kbd class="px-2 py-1 bg-slate-700 text-yellow-300 rounded font-mono text-xs font-bold shadow mb-1">A / LEFT</kbd>
+                        <span class="text-[11px] text-slate-200 font-medium">Pitch Slide Down</span>
+                        <span class="text-[9px] text-slate-400">Release Pressure</span>
+                    </button>
+
+                    <button id="keyPad-KeyD" class="key-card bg-slate-800/80 hover:bg-slate-700 border border-slate-700 rounded-xl p-2 transition flex flex-col items-center">
+                        <kbd class="px-2 py-1 bg-slate-700 text-yellow-300 rounded font-mono text-xs font-bold shadow mb-1">D / RIGHT</kbd>
+                        <span class="text-[11px] text-slate-200 font-medium">Pitch Slide Up</span>
+                        <span class="text-[9px] text-slate-400">Apply Pressure</span>
+                    </button>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Panel: Recording & Rhythm Trainer Studio -->
+        <section class="lg:col-span-3 space-y-4 order-3">
+            
+            <!-- Session Loop Recorder -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <h2 class="text-sm font-bold text-samba-yellow uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-microphone text-xs"></i> Performance Recorder
+                </h2>
+
+                <div class="flex items-center gap-2 mb-3">
+                    <button id="recBtn" class="flex-1 bg-red-600/90 hover:bg-red-500 text-white font-bold py-2 px-3 rounded-xl text-xs transition flex items-center justify-center gap-2 shadow-md">
+                        <i class="fa-solid fa-circle" id="recIcon"></i>
+                        <span id="recText">Record Performance</span>
+                    </button>
+                    <button id="playRecBtn" disabled class="bg-slate-800 hover:bg-slate-700 text-slate-500 disabled:opacity-40 disabled:hover:bg-slate-800 border border-slate-700 py-2 px-3 rounded-xl text-xs transition">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                </div>
+
+                <div class="bg-slate-950 rounded-xl p-3 border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <div class="text-[10px] text-slate-500 uppercase">Recorded Duration</div>
+                        <div id="recTimer" class="font-mono text-sm font-bold text-slate-300">00:00.0</div>
+                    </div>
+                    <div id="recBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400">Idle</div>
+                </div>
+            </div>
+
+            <!-- Auto Rhythm Patterns -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl">
+                <h2 class="text-sm font-bold text-yellow-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-xs"></i> Samba Auto-Phrases
+                </h2>
+                <p class="text-[11px] text-slate-400 mb-3">Trigger classic syncopated cuíca patterns instantly:</p>
+                <div class="grid grid-cols-1 gap-2">
+                    <button class="phrase-btn bg-slate-800 hover:bg-yellow-500/20 text-slate-300 hover:text-yellow-300 border border-slate-700 hover:border-yellow-500/50 text-xs py-2 px-3 rounded-xl transition text-left flex justify-between items-center" data-phrase="syncopated">
+                        <span><strong class="text-yellow-400 mr-1">[1]</strong> Call & Response</span>
+                        <i class="fa-solid fa-play text-[10px]"></i>
+                    </button>
+                    <button class="phrase-btn bg-slate-800 hover:bg-yellow-500/20 text-slate-300 hover:text-yellow-300 border border-slate-700 hover:border-yellow-500/50 text-xs py-2 px-3 rounded-xl transition text-left flex justify-between items-center" data-phrase="roll">
+                        <span><strong class="text-yellow-400 mr-1">[2]</strong> High Squeak Roll</span>
+                        <i class="fa-solid fa-play text-[10px]"></i>
+                    </button>
+                    <button class="phrase-btn bg-slate-800 hover:bg-yellow-500/20 text-slate-300 hover:text-yellow-300 border border-slate-700 hover:border-yellow-500/50 text-xs py-2 px-3 rounded-xl transition text-left flex justify-between items-center" data-phrase="groanSlide">
+                        <span><strong class="text-yellow-400 mr-1">[3]</strong> Deep Pitch Bend</span>
+                        <i class="fa-solid fa-play text-[10px]"></i>
+                    </button>
+                    <button class="phrase-btn bg-slate-800 hover:bg-yellow-500/20 text-slate-300 hover:text-yellow-300 border border-slate-700 hover:border-yellow-500/50 text-xs py-2 px-3 rounded-xl transition text-left flex justify-between items-center" data-phrase="sambaAccent">
+                        <span><strong class="text-yellow-400 mr-1">[4]</strong> Rio Carnival Accent</span>
+                        <i class="fa-solid fa-play text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Instrument History / Info Card -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl text-xs text-slate-400 space-y-2">
+                <h3 class="font-bold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-samba-yellow"></i> Motion Friction Mechanics
+                </h3>
+                <p>
+                    Rapid back-and-forth cursor movements simulate pushing and pulling the wet dampener cloth along the internal bamboo stick (*gambiarra*). Reversing stroke direction causes instant pitch dips and noise bursts, mimicking physical stick friction.
+                </p>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-800 bg-slate-950/80 py-3 text-center text-xs text-slate-500">
+        <p>Virtual Cuíca Samba Studio • Bidirectional Friction Web Audio Engine</p>
+    </footer>
+
+    <!-- Help / Instructions Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-700 max-w-md w-full rounded-3xl p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-samba-yellow flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info"></i> How to Play & Scratch
+                </h3>
+                <button id="closeHelpBtn" class="text-slate-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-1">
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+                    <h4 class="font-bold text-yellow-300 mb-1"><i class="fa-solid fa-arrows-up-down-left-right"></i> Scratching Motion</h4>
+                    <p>Click and drag in rapid back-and-forth strokes (up/down, left/right, diagonal). Reversing direction creates natural push/pull friction timbre changes.</p>
+                </div>
+
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+                    <h4 class="font-bold text-green-300 mb-1"><i class="fa-solid fa-bullseye"></i> Continuous Pitch Control</h4>
+                    <p>Drag outwards towards the rim to simulate applying heavy thumb pressure (bending pitch up to +2 octaves). Dragging near the center yields deep open groans.</p>
+                </div>
+
+                <div class="bg-slate-800/60 p-3 rounded-xl border border-slate-700/50">
+                    <h4 class="font-bold text-blue-300 mb-1"><i class="fa-solid fa-keyboard"></i> Keyboard Controls</h4>
+                    <ul class="list-disc list-inside space-y-1 text-slate-400">
+                        <li><strong class="text-white">Space / J:</strong> High-pressure squeak.</li>
+                        <li><strong class="text-white">Down / K:</strong> Low-pressure deep groan.</li>
+                        <li><strong class="text-white">A / D (Left/Right):</strong> Smooth pitch slide down/up.</li>
+                        <li><strong class="text-white">Keys 1 - 4:</strong> Auto-rhythm samba patterns.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button id="gotItBtn" class="w-full btn-samba py-2.5 rounded-xl text-sm font-bold">
+                Start Playing!
+            </button>
+        </div>
+    </div>
+
+    <!-- AUDIO & ENGINE LOGIC -->
+    <script>
+        /**
+         * Musical Pitch & Frequency Helper Functions
+         */
+        const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        // Converts MIDI note number (0-127) to frequency in Hz
+        function midiToHz(midi) {
+            return 440 * Math.pow(2, (midi - 69) / 12);
+        }
+
+        // Converts frequency in Hz to nearest musical note name (e.g. A3, C#4)
+        function hzToNoteName(hz) {
+            if (!hz || hz <= 0) return "C3";
+            const midi = Math.round(12 * Math.log2(hz / 440) + 69);
+            const noteIndex = (midi % 12 + 12) % 12;
+            const octave = Math.floor(midi / 12) - 1;
+            return `${NOTE_NAMES[noteIndex]}${octave}`;
+        }
+
+        // Converts MIDI note number to Note Name string
+        function midiToNoteName(midi) {
+            const noteIndex = (midi % 12 + 12) % 12;
+            const octave = Math.floor(midi / 12) - 1;
+            return `${NOTE_NAMES[noteIndex]}${octave}`;
+        }
+
+        /**
+         * Enhanced Web Audio Friction Synthesis Engine with Musical Note Pitching
+         */
+        class BulletproofCuicaEngine {
+            constructor() {
+                this.ctx = null;
+                this.isUnlocked = false;
+
+                // Sound Parameters
+                this.baseMidiNote = 57; // MIDI 57 = A3 (220 Hz)
+                this.basePitch = midiToHz(this.baseMidiNote);
+                this.pitchBendSemiMax = 24; // Up to 2 Octaves (+24 semitones)
+                this.pressure = 0.0; // 0 to 1
+                this.resonanceQ = 8.0;
+                this.noiseAmount = 0.35;
+                this.filterMult = 1.8;
+                this.oscType = 'triangle';
+
+                // Core Synthesis Nodes
+                this.masterGain = null;
+                this.analyser = null;
+
+                this.osc = null;
+                this.oscFilter = null;
+                this.oscGain = null;
+
+                this.noiseNode = null;
+                this.noiseFilter = null;
+                this.noiseGain = null;
+
+                this.bodyFilter = null;
+
+                // Active Friction & Motion State
+                this.isFrictionActive = false;
+                this.lastVelocity = 0;
+                this.currentDirection = 'IDLE';
+
+                // Samba Loop State
+                this.sambaPlaying = false;
+                this.sambaBpm = 104;
+                this.sambaTimer = null;
+                this.sambaStep = 0;
+                this.sambaVolume = 0.6;
+                this.sambaPattern = 'batucada';
+
+                // Preset Configurations with Musical Note Anchors
+                this.presets = {
+                    brass: {
+                        baseMidiNote: 57, // A3
+                        pitchBendSemiMax: 24,
+                        resonanceQ: 8.0,
+                        noiseAmount: 0.35,
+                        filterMult: 1.8,
+                        oscType: 'triangle'
+                    },
+                    deepWood: {
+                        baseMidiNote: 50, // D3
+                        pitchBendSemiMax: 18,
+                        resonanceQ: 5.0,
+                        noiseAmount: 0.45,
+                        filterMult: 1.4,
+                        oscType: 'sawtooth'
+                    },
+                    tight: {
+                        baseMidiNote: 64, // E4
+                        pitchBendSemiMax: 28,
+                        resonanceQ: 14.0,
+                        noiseAmount: 0.25,
+                        filterMult: 2.3,
+                        oscType: 'sine'
+                    },
+                    samba: {
+                        baseMidiNote: 60, // C4
+                        pitchBendSemiMax: 24,
+                        resonanceQ: 10.0,
+                        noiseAmount: 0.4,
+                        filterMult: 2.0,
+                        oscType: 'triangle'
+                    },
+                    electric: {
+                        baseMidiNote: 54, // F#3
+                        pitchBendSemiMax: 32,
+                        resonanceQ: 18.0,
+                        noiseAmount: 0.65,
+                        filterMult: 2.8,
+                        oscType: 'square'
+                    }
+                };
+            }
+
+            async unlock() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+
+                if (this.ctx.state === 'suspended') {
+                    await this.ctx.resume();
+                }
+
+                if (!this.isUnlocked) {
+                    this.setupAudioGraph();
+                    this.isUnlocked = true;
+                }
+
+                return this.ctx.state === 'running';
+            }
+
+            setupAudioGraph() {
+                const now = this.ctx.currentTime;
+
+                // Master Output & Analyser
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.setValueAtTime(0.8, now);
+
+                this.analyser = this.ctx.createAnalyser();
+                this.analyser.fftSize = 256;
+
+                // Acoustic Drum Body Resonance Filter
+                this.bodyFilter = this.ctx.createBiquadFilter();
+                this.bodyFilter.type = 'peaking';
+                this.bodyFilter.frequency.setValueAtTime(320, now);
+                this.bodyFilter.Q.setValueAtTime(3.0, now);
+                this.bodyFilter.gain.setValueAtTime(4.0, now);
+
+                this.masterGain.connect(this.bodyFilter);
+                this.bodyFilter.connect(this.analyser);
+                this.analyser.connect(this.ctx.destination);
+
+                // 1. Friction Texture Generator (White Noise)
+                const bufferSize = this.ctx.sampleRate * 2;
+                const noiseBuffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    data[i] = Math.random() * 2 - 1;
+                }
+
+                this.noiseNode = this.ctx.createBufferSource();
+                this.noiseNode.buffer = noiseBuffer;
+                this.noiseNode.loop = true;
+
+                this.noiseFilter = this.ctx.createBiquadFilter();
+                this.noiseFilter.type = 'bandpass';
+                this.noiseFilter.frequency.setValueAtTime(1200, now);
+                this.noiseFilter.Q.setValueAtTime(this.resonanceQ, now);
+
+                this.noiseGain = this.ctx.createGain();
+                this.noiseGain.gain.setValueAtTime(0.001, now);
+
+                this.noiseNode.connect(this.noiseFilter);
+                this.noiseFilter.connect(this.noiseGain);
+                this.noiseGain.connect(this.masterGain);
+                this.noiseNode.start();
+
+                // 2. Membrane Harmonic Oscillator (Tonal Squeak & Groan)
+                this.osc = this.ctx.createOscillator();
+                this.osc.type = this.oscType;
+                this.osc.frequency.setValueAtTime(this.basePitch, now);
+
+                this.oscFilter = this.ctx.createBiquadFilter();
+                this.oscFilter.type = 'bandpass';
+                this.oscFilter.frequency.setValueAtTime(this.basePitch * this.filterMult, now);
+                this.oscFilter.Q.setValueAtTime(this.resonanceQ, now);
+
+                this.oscGain = this.ctx.createGain();
+                this.oscGain.gain.setValueAtTime(0.001, now);
+
+                this.osc.connect(this.oscFilter);
+                this.oscFilter.connect(this.oscGain);
+                this.oscGain.connect(this.masterGain);
+                this.osc.start();
+            }
+
+            applyPreset(presetKey) {
+                const config = this.presets[presetKey];
+                if (!config) return;
+
+                this.baseMidiNote = config.baseMidiNote;
+                this.basePitch = midiToHz(this.baseMidiNote);
+                this.pitchBendSemiMax = config.pitchBendSemiMax;
+                this.resonanceQ = config.resonanceQ;
+                this.noiseAmount = config.noiseAmount;
+                this.filterMult = config.filterMult;
+                this.oscType = config.oscType;
+
+                if (this.osc) {
+                    this.osc.type = this.oscType;
+                }
+
+                // Update UI Sliders
+                document.getElementById('basePitchSlider').value = this.baseMidiNote;
+                document.getElementById('baseNoteVal').textContent = `${midiToNoteName(this.baseMidiNote)} (${Math.round(this.basePitch)} Hz)`;
+
+                document.getElementById('bendRangeSlider').value = this.pitchBendSemiMax;
+                const bendOctaves = (this.pitchBendSemiMax / 12).toFixed(1);
+                document.getElementById('bendRangeVal').textContent = `+${bendOctaves} Octaves (+${this.pitchBendSemiMax} Semi)`;
+
+                document.getElementById('resSlider').value = this.resonanceQ;
+                document.getElementById('resVal').textContent = this.resonanceQ.toFixed(1);
+
+                document.getElementById('noiseGainSlider').value = Math.round(this.noiseAmount * 100);
+                document.getElementById('noiseGainVal').textContent = `${Math.round(this.noiseAmount * 100)}%`;
+            }
+
+            // Trigger or update dynamic friction sounds with pitch note shifts
+            triggerFriction(velocity, pressureVal, pitchShiftOffset = 0, dirInfo = { isReversal: false, dirName: 'PUSH' }) {
+                if (!this.isUnlocked || !this.ctx) return;
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                const now = this.ctx.currentTime;
+                this.lastVelocity = Math.min(Math.max(velocity, 0.05), 3.0);
+                this.pressure = Math.min(Math.max(pressureVal, 0), 1.0);
+                this.currentDirection = dirInfo.dirName;
+
+                // Calculate target fundamental pitch based on pitch bend range (+X semitones)
+                const pitchSemitones = this.pressure * this.pitchBendSemiMax;
+                const pressurePitchRatio = Math.pow(2, pitchSemitones / 12);
+                let targetFreq = (this.basePitch * pressurePitchRatio) + pitchShiftOffset;
+
+                // Micro pitch dip when stroke reverses (physical friction transition)
+                if (dirInfo.isReversal) {
+                    targetFreq *= 0.88; 
+                }
+
+                const filterFreq = targetFreq * this.filterMult;
+
+                // Smooth Glide & Portamento
+                const transitionTime = dirInfo.isReversal ? 0.01 : 0.025;
+                this.osc.frequency.setTargetAtTime(targetFreq, now, transitionTime);
+                this.oscFilter.frequency.setTargetAtTime(filterFreq, now, transitionTime);
+                
+                // Boost resonance on fast directional scratches
+                const dynamicQ = this.resonanceQ + (this.lastVelocity * 2.0);
+                this.oscFilter.Q.setTargetAtTime(dynamicQ, now, 0.02);
+
+                this.noiseFilter.frequency.setTargetAtTime(filterFreq * 1.5, now, transitionTime);
+                this.noiseFilter.Q.setTargetAtTime(dynamicQ * 0.6, now, 0.02);
+
+                // Dynamic Volume Envelopes with Directional Timbre Adjustments
+                const pullBoost = (dirInfo.dirName === 'PULL' || dirInfo.dirName === 'LEFT') ? 1.15 : 1.0;
+                const oscVol = Math.min(this.lastVelocity * 0.45 * pullBoost, 0.95);
+                
+                const reversalNoiseMultiplier = dirInfo.isReversal ? 1.8 : 1.0;
+                const noiseVol = Math.min(this.lastVelocity * 0.35 * this.noiseAmount * reversalNoiseMultiplier, 0.65);
+
+                this.oscGain.gain.setTargetAtTime(oscVol, now, 0.01);
+                this.noiseGain.gain.setTargetAtTime(noiseVol, now, 0.01);
+
+                this.isFrictionActive = true;
+            }
+
+            stopFriction() {
+                if (!this.isUnlocked || !this.ctx) return;
+                const now = this.ctx.currentTime;
+                this.oscGain.gain.setTargetAtTime(0.0001, now, 0.04);
+                this.noiseGain.gain.setTargetAtTime(0.0001, now, 0.04);
+                this.isFrictionActive = false;
+                this.currentDirection = 'IDLE';
+            }
+
+            // Samba Backing Groove Synthesizer
+            playSambaStep(step) {
+                if (!this.sambaPlaying || !this.isUnlocked) return;
+                const now = this.ctx.currentTime;
+                const vol = this.sambaVolume;
+
+                // 1. Surdo Bass Drum (Beats 0, 4, 8, 12)
+                if (step % 4 === 0) {
+                    const isAccent = (step === 8 || step === 0);
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(isAccent ? 75 : 65, now);
+                    osc.frequency.exponentialRampToValueAtTime(30, now + 0.22);
+
+                    gain.gain.setValueAtTime((isAccent ? 0.8 : 0.5) * vol, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.masterGain);
+                    osc.start(now);
+                    osc.stop(now + 0.28);
+                }
+
+                // 2. Agogô Bell (Syncopated)
+                if (this.sambaPattern !== 'surdo') {
+                    if (step === 2 || step === 5 || step === 10 || step === 13) {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(step % 5 === 0 ? 1150 : 820, now);
+
+                        gain.gain.setValueAtTime(0.25 * vol, now);
+                        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+
+                        osc.connect(gain);
+                        gain.connect(this.masterGain);
+                        osc.start(now);
+                        osc.stop(now + 0.12);
+                    }
+                }
+            }
+
+            toggleSamba(start) {
+                this.sambaPlaying = start;
+                if (start) {
+                    this.unlock();
+                    this.sambaStep = 0;
+                    const interval = (60 / this.sambaBpm / 4) * 1000;
+                    this.sambaTimer = setInterval(() => {
+                        this.playSambaStep(this.sambaStep);
+                        this.sambaStep = (this.sambaStep + 1) % 16;
+                    }, interval);
+                } else {
+                    if (this.sambaTimer) clearInterval(this.sambaTimer);
+                }
+            }
+
+            updateSambaBpm(bpm) {
+                this.sambaBpm = bpm;
+                if (this.sambaPlaying) {
+                    this.toggleSamba(false);
+                    this.toggleSamba(true);
+                }
+            }
+        }
+
+        /**
+         * Canvas Renderer for Multidirectional Scratching, Stick Flex, and Dynamic Note Labels
+         */
+        class CuicaVisualizer {
+            constructor(canvasId, audioEngine) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.audio = audioEngine;
+
+                this.isDragging = false;
+                this.lastPos = { x: 0, y: 0 };
+                this.currentPos = { x: 0, y: 0 };
+                this.lastVector = { x: 0, y: 0 };
+
+                this.stickOffset = { x: 0, y: 0 };
+                this.stickFlex = { x: 0, y: 0 };
+
+                this.particles = [];
+                this.rippleRadius = 0;
+
+                this.setupEvents();
+                this.animate();
+            }
+
+            setupEvents() {
+                const getCoords = (e) => {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                    return {
+                        x: (clientX - rect.left) * (this.canvas.width / rect.width),
+                        y: (clientY - rect.top) * (this.canvas.height / rect.height)
+                    };
+                };
+
+                const handleStart = async (e) => {
+                    await this.audio.unlock();
+                    
+                    const hint = document.getElementById('canvasOverlayHint');
+                    if (hint) hint.classList.add('opacity-0');
+
+                    this.isDragging = true;
+                    const pos = getCoords(e);
+                    this.lastPos = pos;
+                    this.currentPos = pos;
+                    this.lastVector = { x: 0, y: 0 };
+
+                    const cx = this.canvas.width / 2;
+                    const cy = this.canvas.height / 2;
+                    const dist = Math.hypot(pos.x - cx, pos.y - cy);
+
+                    const pressure = Math.min(Math.max(dist / 200, 0), 1.0);
+                    this.audio.triggerFriction(0.8, pressure, 0, { isReversal: false, dirName: 'START' });
+                };
+
+                const handleMove = (e) => {
+                    if (!this.isDragging) return;
+                    e.preventDefault();
+                    const pos = getCoords(e);
+                    this.currentPos = pos;
+
+                    const dx = pos.x - this.lastPos.x;
+                    const dy = pos.y - this.lastPos.y;
+                    const distance = Math.hypot(dx, dy);
+
+                    const cx = this.canvas.width / 2;
+                    const cy = this.canvas.height / 2;
+                    const distFromCenter = Math.hypot(pos.x - cx, pos.y - cy);
+
+                    const vel = Math.min(distance / 5.0, 3.0);
+                    const pressure = Math.min(Math.max(distFromCenter / 200, 0.0), 1.0);
+
+                    const isReversal = (dx * this.lastVector.x + dy * this.lastVector.y) < -15;
+                    let dirName = 'PUSH';
+                    if (Math.abs(dy) > Math.abs(dx)) {
+                        dirName = dy < 0 ? 'PULL' : 'PUSH';
+                    } else {
+                        dirName = dx < 0 ? 'LEFT' : 'RIGHT';
+                    }
+
+                    if (distance > 1.5) {
+                        this.audio.triggerFriction(vel, pressure, 0, { isReversal, dirName });
+                        this.spawnParticles(pos.x, pos.y, vel, pressure);
+
+                        this.stickFlex.x = Math.max(Math.min(dx * 0.4, 25), -25);
+                        this.stickFlex.y = Math.max(Math.min(dy * 0.4, 25), -25);
+
+                        this.lastVector = { x: dx, y: dy };
+                    }
+
+                    this.stickOffset.x = (pos.x - cx) * 0.15;
+                    this.stickOffset.y = (pos.y - cy) * 0.15;
+                    this.lastPos = pos;
+
+                    // Compute dynamic note name readout
+                    const semitones = pressure * this.audio.pitchBendSemiMax;
+                    const currentHz = this.audio.basePitch * Math.pow(2, semitones / 12);
+                    const currentNote = hzToNoteName(currentHz);
+
+                    document.getElementById('frictionSpeedDisplay').textContent = `Velocity: ${vel.toFixed(1)}`;
+                    document.getElementById('strokeDirectionDisplay').textContent = `Stroke: ${dirName}`;
+                    document.getElementById('pressureIndicator').textContent = `Note: ${currentNote} (+${semitones.toFixed(1)} Semi)`;
+
+                    const motionBar = document.getElementById('motionBar');
+                    if (motionBar) motionBar.style.width = `${Math.min(vel * 33.3, 100)}%`;
+                };
+
+                const handleEnd = () => {
+                    this.isDragging = false;
+                    this.audio.stopFriction();
+                    document.getElementById('frictionSpeedDisplay').textContent = `Velocity: 0.0`;
+                    document.getElementById('strokeDirectionDisplay').textContent = `Stroke: IDLE`;
+                    const motionBar = document.getElementById('motionBar');
+                    if (motionBar) motionBar.style.width = `0%`;
+                };
+
+                this.canvas.addEventListener('mousedown', handleStart);
+                this.canvas.addEventListener('mousemove', handleMove);
+                window.addEventListener('mouseup', handleEnd);
+
+                this.canvas.addEventListener('touchstart', handleStart, { passive: false });
+                this.canvas.addEventListener('touchmove', handleMove, { passive: false });
+                window.addEventListener('touchend', handleEnd);
+            }
+
+            spawnParticles(x, y, speed, pressure) {
+                const count = Math.floor(speed * 4);
+                for (let i = 0; i < count; i++) {
+                    this.particles.push({
+                        x: x + (Math.random() - 0.5) * 20,
+                        y: y + (Math.random() - 0.5) * 20,
+                        vx: (Math.random() - 0.5) * 4 * speed,
+                        vy: (Math.random() - 0.5) * 4 * speed,
+                        radius: Math.random() * 5 + 2,
+                        alpha: 1.0,
+                        color: pressure > 0.5 ? '#fed100' : '#009b3a'
+                    });
+                }
+            }
+
+            draw() {
+                const ctx = this.ctx;
+                const cx = this.canvas.width / 2;
+                const cy = this.canvas.height / 2;
+
+                ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                this.stickFlex.x *= 0.85;
+                this.stickFlex.y *= 0.85;
+
+                // Outer Brass Shell Shadow
+                ctx.beginPath();
+                ctx.arc(cx, cy + 8, 220, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                ctx.fill();
+
+                // Brass Shell Rim
+                const brassGrad = ctx.createRadialGradient(cx - 50, cy - 50, 100, cx, cy, 220);
+                brassGrad.addColorStop(0, '#fef08a');
+                brassGrad.addColorStop(0.5, '#d4af37');
+                brassGrad.addColorStop(1, '#78350f');
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 220, 0, Math.PI * 2);
+                ctx.fillStyle = brassGrad;
+                ctx.fill();
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#fef08a';
+                ctx.stroke();
+
+                // Tuning Hardware Screws
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i * Math.PI / 4);
+                    const bx = cx + Math.cos(angle) * 204;
+                    const by = cy + Math.sin(angle) * 204;
+                    ctx.beginPath();
+                    ctx.arc(bx, by, 7, 0, Math.PI * 2);
+                    ctx.fillStyle = '#451a03';
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.arc(bx, by, 4, 0, Math.PI * 2);
+                    ctx.fillStyle = '#fef08a';
+                    ctx.fill();
+                }
+
+                // Leather Drumhead Membrane
+                const skinGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, 185);
+                skinGrad.addColorStop(0, '#fef3c7');
+                skinGrad.addColorStop(0.7, '#fde68a');
+                skinGrad.addColorStop(1, '#d97706');
+
+                ctx.beginPath();
+                ctx.arc(cx, cy, 185, 0, Math.PI * 2);
+                ctx.fillStyle = skinGrad;
+                ctx.fill();
+                ctx.strokeStyle = '#92400e';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Musical Note Pitch Bend Zone Rings
+                const baseMidi = this.audio.baseMidiNote;
+                const ringIntervals = [0.25, 0.5, 0.75, 1.0];
+                ringIntervals.forEach((frac) => {
+                    const radius = 180 * frac;
+                    const semiShift = frac * this.audio.pitchBendSemiMax;
+                    const noteStr = midiToNoteName(Math.round(baseMidi + semiShift));
+
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                    ctx.strokeStyle = 'rgba(146, 64, 14, 0.2)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+
+                    // Note Name Ring Label
+                    ctx.font = '10px Poppins, sans-serif';
+                    ctx.fillStyle = 'rgba(120, 53, 15, 0.5)';
+                    ctx.fillText(noteStr, cx + radius - 14, cy - 4);
+                });
+
+                // Membrane Ripple
+                if (this.audio.isFrictionActive) {
+                    this.rippleRadius = (this.rippleRadius + 4) % 180;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, this.rippleRadius, 0, Math.PI * 2);
+                    ctx.strokeStyle = `rgba(254, 209, 0, ${0.6 - this.rippleRadius / 180})`;
+                    ctx.lineWidth = 2.5;
+                    ctx.stroke();
+                }
+
+                // Scratch Cursor Indicator
+                if (this.isDragging) {
+                    ctx.beginPath();
+                    ctx.arc(this.currentPos.x, this.currentPos.y, 20, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(0, 155, 58, 0.35)';
+                    ctx.fill();
+                    ctx.strokeStyle = '#009b3a';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                // Central Bamboo Stick
+                const stickX = cx + this.stickOffset.x;
+                const stickY = cy + this.stickOffset.y;
+                const flexX = stickX + this.stickFlex.x;
+                const flexY = stickY + this.stickFlex.y;
+
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.quadraticCurveTo(stickX, stickY, flexX, flexY);
+                ctx.lineWidth = 10;
+                ctx.strokeStyle = '#ca8a04';
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Wet Cloth / Sponge Dampener
+                const clothColor = this.audio.isFrictionActive ? '#009b3a' : '#15803d';
+                ctx.beginPath();
+                ctx.arc(flexX, flexY, 18, 0, Math.PI * 2);
+                ctx.fillStyle = clothColor;
+                ctx.fill();
+                ctx.strokeStyle = '#fef08a';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Center tying knot
+                ctx.beginPath();
+                ctx.arc(cx, cy, 6, 0, Math.PI * 2);
+                ctx.fillStyle = '#713f12';
+                ctx.fill();
+
+                // Particles
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    const p = this.particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.alpha -= 0.035;
+                    if (p.alpha <= 0) {
+                        this.particles.splice(i, 1);
+                        continue;
+                    }
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.alpha;
+                    ctx.fill();
+                    ctx.globalAlpha = 1.0;
+                }
+            }
+
+            animate() {
+                this.draw();
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        /**
+         * Real-time Spectrum Analyzer Display
+         */
+        class WaveformVisualizer {
+            constructor(canvasId, audioEngine) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.audio = audioEngine;
+                this.render();
+            }
+
+            render() {
+                requestAnimationFrame(() => this.render());
+                if (!this.audio.analyser) return;
+
+                const bufferLength = this.audio.analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                this.audio.analyser.getByteFrequencyData(dataArray);
+
+                const width = this.canvas.width;
+                const height = this.canvas.height;
+                this.ctx.clearRect(0, 0, width, height);
+
+                const barWidth = (width / bufferLength) * 2.5;
+                let x = 0;
+
+                for (let i = 0; i < bufferLength; i++) {
+                    const barHeight = (dataArray[i] / 255) * height;
+                    const hue = (i / bufferLength) * 120 + 40;
+                    this.ctx.fillStyle = `hsl(${hue}, 100%, 50%)`;
+                    this.ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+                    x += barWidth + 1;
+                }
+            }
+        }
+
+        /**
+         * Main Application Controller & Event Binding
+         */
+        class CuicaApp {
+            constructor() {
+                this.audio = new BulletproofCuicaEngine();
+                this.visualizer = new CuicaVisualizer('cuicaCanvas', this.audio);
+                this.waveform = new WaveformVisualizer('waveformCanvas', this.audio);
+
+                this.isRecording = false;
+                this.recordedEvents = [];
+                this.recStartTime = 0;
+                this.recInterval = null;
+
+                this.bindEvents();
+                this.bindKeyboard();
+            }
+
+            bindEvents() {
+                const unlockAudio = async () => {
+                    const ok = await this.audio.unlock();
+                    if (ok) {
+                        const overlay = document.getElementById('audioUnlockOverlay');
+                        if (overlay) overlay.classList.add('opacity-0', 'pointer-events-none');
+
+                        const badge = document.getElementById('audioStatusBadge');
+                        badge.className = 'text-xs px-3 py-1.5 rounded-xl bg-green-950/80 text-green-400 border border-green-800 flex items-center gap-2 font-mono';
+                        badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> Audio Ready';
+
+                        const activeDot = document.getElementById('activeDot');
+                        if (activeDot) activeDot.className = 'inline-block w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse';
+                    }
+                };
+
+                document.getElementById('unlockAudioBtn').addEventListener('click', unlockAudio);
+                document.getElementById('audioUnlockOverlay').addEventListener('click', unlockAudio);
+
+                // Help Modal Controls
+                const modal = document.getElementById('helpModal');
+                document.getElementById('helpModalBtn').addEventListener('click', () => modal.classList.remove('hidden'));
+                document.getElementById('closeHelpBtn').addEventListener('click', () => modal.classList.add('hidden'));
+                document.getElementById('gotItBtn').addEventListener('click', () => modal.classList.add('hidden'));
+
+                // Presets Switcher Buttons
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        await unlockAudio();
+                        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                        const currentBtn = e.currentTarget;
+                        currentBtn.classList.add('active');
+
+                        const preset = currentBtn.dataset.preset;
+                        this.audio.applyPreset(preset);
+                    });
+                });
+
+                // Custom Tuning Controls using Musical Note MIDI values
+                document.getElementById('basePitchSlider').addEventListener('input', (e) => {
+                    const midi = parseInt(e.target.value);
+                    this.audio.baseMidiNote = midi;
+                    this.audio.basePitch = midiToHz(midi);
+                    const noteName = midiToNoteName(midi);
+                    document.getElementById('baseNoteVal').textContent = `${noteName} (${Math.round(this.audio.basePitch)} Hz)`;
+                });
+
+                document.getElementById('bendRangeSlider').addEventListener('input', (e) => {
+                    const semitones = parseInt(e.target.value);
+                    this.audio.pitchBendSemiMax = semitones;
+                    const octaves = (semitones / 12).toFixed(1);
+                    document.getElementById('bendRangeVal').textContent = `+${octaves} Octaves (+${semitones} Semi)`;
+                });
+
+                document.getElementById('resSlider').addEventListener('input', (e) => {
+                    this.audio.resonanceQ = parseFloat(e.target.value);
+                    document.getElementById('resVal').textContent = parseFloat(e.target.value).toFixed(1);
+                });
+
+                document.getElementById('noiseGainSlider').addEventListener('input', (e) => {
+                    this.audio.noiseAmount = parseFloat(e.target.value) / 100;
+                    document.getElementById('noiseGainVal').textContent = `${e.target.value}%`;
+                });
+
+                // Samba Backing Groove
+                document.getElementById('toggleSambaBtn').addEventListener('click', async () => {
+                    await unlockAudio();
+                    const nextState = !this.audio.sambaPlaying;
+                    this.audio.toggleSamba(nextState);
+
+                    const btn = document.getElementById('toggleSambaBtn');
+                    const text = document.getElementById('sambaText');
+                    const icon = document.getElementById('sambaIcon');
+                    const status = document.getElementById('sambaStatus');
+
+                    if (nextState) {
+                        btn.classList.replace('bg-green-600', 'bg-red-600');
+                        text.textContent = 'Stop Samba Groove';
+                        icon.className = 'fa-solid fa-square';
+                        status.textContent = 'Playing';
+                        status.className = 'text-[10px] bg-green-900/80 text-green-300 px-2 py-0.5 rounded-full uppercase animate-pulse';
+                    } else {
+                        btn.classList.replace('bg-red-600', 'bg-green-600');
+                        text.textContent = 'Start Samba Groove';
+                        icon.className = 'fa-solid fa-play';
+                        status.textContent = 'Stopped';
+                        status.className = 'text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full uppercase';
+                    }
+                });
+
+                document.getElementById('bpmSlider').addEventListener('input', (e) => {
+                    const bpm = parseInt(e.target.value);
+                    document.getElementById('bpmVal').textContent = bpm;
+                    this.audio.updateSambaBpm(bpm);
+                });
+
+                document.getElementById('grooveSelect').addEventListener('change', (e) => {
+                    this.audio.sambaPattern = e.target.value;
+                });
+
+                document.getElementById('sambaVolSlider').addEventListener('input', (e) => {
+                    this.audio.sambaVolume = parseInt(e.target.value) / 100;
+                    document.getElementById('sambaVolVal').textContent = `${e.target.value}%`;
+                });
+
+                // Auto Phrases
+                document.querySelectorAll('.phrase-btn').forEach(btn => {
+                    btn.addEventListener('click', async (e) => {
+                        await unlockAudio();
+                        const phrase = e.currentTarget.dataset.phrase;
+                        this.playAutoPhrase(phrase);
+                    });
+                });
+
+                // Recorder Controls
+                document.getElementById('recBtn').addEventListener('click', () => this.toggleRecord());
+                document.getElementById('playRecBtn').addEventListener('click', () => this.playRecordedSession());
+            }
+
+            bindKeyboard() {
+                let activeKeys = {};
+
+                const triggerKeyPad = (code, down) => {
+                    const pad = document.getElementById(`keyPad-${code}`);
+                    if (pad) {
+                        if (down) pad.classList.add('bg-samba-yellow/20', 'border-yellow-400');
+                        else pad.classList.remove('bg-samba-yellow/20', 'border-yellow-400');
+                    }
+                };
+
+                window.addEventListener('keydown', async (e) => {
+                    if (e.repeat || activeKeys[e.code]) return;
+                    activeKeys[e.code] = true;
+                    await this.audio.unlock();
+
+                    triggerKeyPad(e.code, true);
+
+                    if (e.code === 'Space' || e.code === 'KeyJ') {
+                        e.preventDefault();
+                        this.audio.triggerFriction(1.5, 0.9, 0, { isReversal: false, dirName: 'KEY_HIGH' });
+                        this.recordAction('high');
+                    } else if (e.code === 'ArrowDown' || e.code === 'KeyK' || e.code === 'KeyS') {
+                        e.preventDefault();
+                        this.audio.triggerFriction(1.2, 0.05, 0, { isReversal: false, dirName: 'KEY_LOW' });
+                        this.recordAction('low');
+                    } else if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+                        this.audio.triggerFriction(1.0, 0.1, -80, { isReversal: false, dirName: 'KEY_SLIDE_DOWN' });
+                    } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+                        this.audio.triggerFriction(1.0, 0.8, 100, { isReversal: false, dirName: 'KEY_SLIDE_UP' });
+                    } else if (e.code === 'Digit1') {
+                        this.playAutoPhrase('syncopated');
+                    } else if (e.code === 'Digit2') {
+                        this.playAutoPhrase('roll');
+                    } else if (e.code === 'Digit3') {
+                        this.playAutoPhrase('groanSlide');
+                    } else if (e.code === 'Digit4') {
+                        this.playAutoPhrase('sambaAccent');
+                    }
+                });
+
+                window.addEventListener('keyup', (e) => {
+                    activeKeys[e.code] = false;
+                    triggerKeyPad(e.code, false);
+
+                    if (['Space', 'KeyJ', 'ArrowDown', 'KeyK', 'KeyS', 'ArrowLeft', 'KeyA', 'ArrowRight', 'KeyD'].includes(e.code)) {
+                        this.audio.stopFriction();
+                    }
+                });
+            }
+
+            playAutoPhrase(phrase) {
+                const patterns = {
+                    syncopated: [
+                        { time: 0, high: false, vel: 1.1, dir: 'PUSH' },
+                        { time: 160, high: true, vel: 1.5, dir: 'PULL' },
+                        { time: 320, high: false, vel: 1.0, dir: 'PUSH' },
+                        { time: 480, high: true, vel: 1.6, dir: 'PULL' }
+                    ],
+                    roll: [
+                        { time: 0, high: true, vel: 1.3, dir: 'PUSH' },
+                        { time: 100, high: true, vel: 1.4, dir: 'PULL' },
+                        { time: 200, high: true, vel: 1.5, dir: 'PUSH' },
+                        { time: 300, high: true, vel: 1.7, dir: 'PULL' }
+                    ],
+                    groanSlide: [
+                        { time: 0, high: false, vel: 1.5, dir: 'PULL' },
+                        { time: 220, high: true, vel: 1.3, dir: 'PUSH' }
+                    ],
+                    sambaAccent: [
+                        { time: 0, high: true, vel: 1.6, dir: 'PULL' },
+                        { time: 140, high: false, vel: 1.0, dir: 'PUSH' },
+                        { time: 280, high: true, vel: 1.6, dir: 'PULL' }
+                    ]
+                };
+
+                const steps = patterns[phrase] || patterns.syncopated;
+                steps.forEach(step => {
+                    setTimeout(() => {
+                        this.audio.triggerFriction(step.vel, step.high ? 0.85 : 0.1, 0, { isReversal: true, dirName: step.dir });
+                        setTimeout(() => this.audio.stopFriction(), 110);
+                    }, step.time);
+                });
+            }
+
+            toggleRecord() {
+                this.isRecording = !this.isRecording;
+                const btn = document.getElementById('recBtn');
+                const text = document.getElementById('recText');
+                const badge = document.getElementById('recBadge');
+
+                if (this.isRecording) {
+                    this.recordedEvents = [];
+                    this.recStartTime = Date.now();
+                    btn.classList.replace('bg-red-600/90', 'bg-slate-700');
+                    text.textContent = 'Stop Recording';
+                    badge.textContent = 'REC';
+                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-red-900 text-red-300 font-bold animate-pulse';
+
+                    this.recInterval = setInterval(() => {
+                        const elapsed = (Date.now() - this.recStartTime) / 1000;
+                        document.getElementById('recTimer').textContent = `00:${elapsed < 10 ? '0' : ''}${elapsed.toFixed(1)}`;
+                    }, 100);
+                } else {
+                    clearInterval(this.recInterval);
+                    btn.classList.replace('bg-slate-700', 'bg-red-600/90');
+                    text.textContent = 'Record Performance';
+                    badge.textContent = 'Ready';
+                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+
+                    if (this.recordedEvents.length > 0) {
+                        document.getElementById('playRecBtn').disabled = false;
+                        document.getElementById('playRecBtn').classList.replace('text-slate-500', 'text-yellow-400');
+                    }
+                }
+            }
+
+            recordAction(type) {
+                if (!this.isRecording) return;
+                const time = Date.now() - this.recStartTime;
+                this.recordedEvents.push({ time, type });
+            }
+
+            playRecordedSession() {
+                if (this.recordedEvents.length === 0) return;
+                this.recordedEvents.forEach(evt => {
+                    setTimeout(() => {
+                        this.audio.triggerFriction(1.4, evt.type === 'high' ? 0.85 : 0.1, 0, { isReversal: false, dirName: 'PLAYBACK' });
+                        setTimeout(() => this.audio.stopFriction(), 120);
+                    }, evt.time);
+                });
+            }
+        }
+
+        // Initialize App on Load
+        window.addEventListener('load', () => {
+            window.cuicaApp = new CuicaApp();
+        });
+    </script>
+</body>
+</html>
