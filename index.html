@@ -1,1016 +1,1455 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Virtual Cuíca Drum — Brazilian Friction Percussion</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        /* Custom tactile textures, animations, and strict touch isolation */
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            touch-action: none;
-            font-family: 'Inter', sans-serif;
-            background-color: #14100d;
-            color: #f7f3ee;
-        }
-
-        /* Realistic Calfskin Drumhead Texture */
-        .drumhead-skin {
-            background: 
-                radial-gradient(circle at 35% 30%, rgba(255, 250, 240, 0.95) 0%, rgba(235, 217, 188, 0.92) 45%, rgba(199, 173, 134, 0.96) 82%, rgba(154, 125, 86, 1) 100%);
-            box-shadow: 
-                inset 0 0 28px rgba(74, 48, 22, 0.55),
-                inset 0 4px 12px rgba(255, 255, 255, 0.6),
-                0 12px 32px rgba(0, 0, 0, 0.65);
-        }
-
-        /* Subtle organic grain overlay for drumhead */
-        .drumhead-grain {
-            background-image: radial-gradient(rgba(110, 75, 40, 0.08) 1px, transparent 0);
-            background-size: 6px 6px;
-        }
-
-        /* Warm Brass / Wood Rim */
-        .drum-rim {
-            background: conic-gradient(
-                from 45deg,
-                #b88636,
-                #f2d080,
-                #8f601d,
-                #e5be6b,
-                #754b12,
-                #d6ab56,
-                #b88636
-            );
-            box-shadow: 
-                0 14px 35px rgba(0, 0, 0, 0.75),
-                inset 0 2px 4px rgba(255, 255, 255, 0.55),
-                inset 0 -3px 6px rgba(45, 25, 5, 0.7);
-        }
-
-        /* Bamboo Stick Texture */
-        .bamboo-stick {
-            background: linear-gradient(
-                90deg,
-                #8c6229 0%,
-                #d6a85a 28%,
-                #f2cf88 48%,
-                #c49245 78%,
-                #78501c 100%
-            );
-            box-shadow: 
-                inset 0 0 6px rgba(50, 30, 5, 0.5),
-                0 4px 16px rgba(0, 0, 0, 0.6);
-        }
-
-        /* Bamboo Node Rings */
-        .bamboo-node {
-            background: linear-gradient(
-                180deg,
-                rgba(65, 40, 10, 0.7) 0%,
-                rgba(245, 215, 150, 0.6) 50%,
-                rgba(55, 32, 8, 0.8) 100%
-            );
-        }
-
-        /* Damp Cloth Grip */
-        .cloth-grip {
-            background: radial-gradient(circle at 35% 35%, #fefefe 0%, #e2e8f0 55%, #94a3b8 100%);
-            box-shadow: 
-                0 6px 16px rgba(0, 0, 0, 0.65),
-                inset 0 2px 4px rgba(255, 255, 255, 0.9),
-                inset 0 -3px 6px rgba(51, 65, 85, 0.45);
-        }
-
-        /* Active Friction Heat Glow */
-        .friction-glow {
-            box-shadow: 0 0 24px 6px rgba(251, 146, 60, 0.75), 0 0 48px 12px rgba(234, 88, 12, 0.45);
-        }
-
-        /* Range slider styling */
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            background: transparent;
-            cursor: pointer;
-        }
-        input[type="range"]::-webkit-slider-runnable-track {
-            height: 6px;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.15);
-        }
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #f59e0b;
-            border: 2px solid #fffbeb;
-            margin-top: -6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Cuíca v0.4 (Alpha Test) — Virtual Brazilian Friction Drum</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      overscroll-behavior: none;
+      touch-action: none;
+      background-color: #0c0a09;
+      color: #f5f5f4;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      touch-action: none;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      border-radius: 999px;
+      background: #292524;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f59e0b;
+      margin-top: -5px;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.5);
+    }
+  </style>
 </head>
-<body class="flex flex-col justify-between select-none bg-gradient-to-b from-[#1a1410] via-[#140f0c] to-[#0d0907]">
+<body class="flex flex-col justify-between bg-stone-950 text-stone-100 select-none">
 
-    <!-- Audio Unlock Overlay Modal (Required for iOS/Android Mobile Web Audio) -->
-    <div id="unlockOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/85 backdrop-blur-md p-6 text-center transition-opacity duration-300">
-        <div class="max-w-sm w-full bg-[#221a14] border border-amber-500/30 rounded-3xl p-7 shadow-2xl">
-            <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center shadow-lg shadow-orange-600/30">
-                <!-- Stylized Cuica Icon -->
-                <svg class="w-9 h-9 text-stone-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                    <ellipse cx="12" cy="7" rx="8" ry="3.5"/>
-                    <path d="M4 7v9c0 1.93 3.58 3.5 8 3.5s8-1.57 8-3.5V7"/>
-                    <line x1="12" y1="7" x2="12" y2="22" stroke-linecap="round"/>
-                </svg>
-            </div>
-            <h1 class="text-2xl font-extrabold tracking-tight text-amber-50 mb-1">Virtual Cuíca</h1>
-            <p class="text-xs uppercase tracking-widest text-amber-400/90 font-semibold mb-4">Brazilian Samba Friction Drum</p>
-            <p class="text-sm text-stone-300 leading-relaxed mb-6">
-                Use <strong>two thumbs</strong> at once: press &amp; slide on the <strong>drumhead</strong> to bend pitch, while rubbing the <strong>bamboo stick</strong> up &amp; down to create the vocal squeak!
-            </p>
-            <button id="startAudioBtn" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-95 text-stone-950 font-bold text-base shadow-lg shadow-orange-500/30 transition transform">
-                Tap to Enable Sound
-            </button>
+  <!-- Audio Start / Unlock Overlay -->
+  <div id="startOverlay" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-stone-950/95 backdrop-blur-md p-6 text-center transition-opacity duration-300">
+    <div class="max-w-md w-full bg-stone-900/90 border border-amber-500/30 rounded-3xl p-7 shadow-2xl space-y-5">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/15 border border-amber-400/30 text-amber-400 mx-auto">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2z" />
+        </svg>
+      </div>
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider mb-2">
+          v0.4 &bull; Alpha Test
         </div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-amber-400">Brazilian Cuíca</h1>
+        <p class="text-xs uppercase tracking-widest text-stone-400 mt-1">Multi-Touch Friction Drum Studio</p>
+      </div>
+      <p class="text-sm text-stone-300 leading-relaxed">
+        Rub the <span class="text-amber-300 font-semibold">Bamboo Stick (Gambitto)</span> to excite stick-slip friction while pressing and sliding on the <span class="text-emerald-300 font-semibold">Goatskin Head</span> to bend pitch, tap thumps, and control resonance.
+      </p>
+      <button id="startBtn" class="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 active:scale-[0.99] text-stone-950 font-bold text-base shadow-lg shadow-amber-500/25 transition">
+        Tap to Activate Audio Engine
+      </button>
+      <p id="audioErrorMsg" class="hidden text-xs text-rose-400 bg-rose-950/60 border border-rose-500/30 rounded-xl p-2.5"></p>
+    </div>
+  </div>
+
+  <!-- Version History Modal -->
+  <div id="versionModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-stone-950/85 backdrop-blur-sm p-4">
+    <div class="max-w-lg w-full bg-stone-900 border border-stone-700 rounded-3xl p-6 shadow-2xl space-y-4 max-h-[85dvh] flex flex-col">
+      <div class="flex items-center justify-between border-b border-stone-800 pb-3 shrink-0">
+        <div>
+          <h2 class="text-lg font-extrabold text-amber-400 flex items-center gap-2">
+            <span>Version History</span>
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 border border-amber-400/40 text-amber-300">v0.4 Alpha Test</span>
+          </h2>
+          <p class="text-xs text-stone-400 mt-0.5">Release changelog &amp; build milestones</p>
+        </div>
+        <button id="closeVersionModalBtn" class="w-8 h-8 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-300 flex items-center justify-center font-bold transition" aria-label="Close version history">
+          ✕
+        </button>
+      </div>
+
+      <div class="overflow-y-auto pr-1 space-y-4 text-left select-text">
+        <!-- v0.4 -->
+        <div class="p-3.5 rounded-2xl bg-amber-950/25 border border-amber-500/30 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-amber-300">v0.4 — Alpha Test (Current)</span>
+            <span class="text-[11px] font-mono text-amber-400/80">2026-11-18</span>
+          </div>
+          <ul class="text-xs text-stone-300 space-y-1 list-disc list-inside">
+            <li>Promoted build to <strong class="text-stone-100">Alpha Test (v0.4)</strong> and standardized entry point as <code class="text-amber-300">index.html</code>.</li>
+            <li>Added interactive <strong class="text-stone-100">Version History</strong> badge and release changelog modal.</li>
+            <li>Added dedicated <strong class="text-stone-100">Beat Vol</strong> slider and isolated Web Audio sub-mix gain bus for Samba accompaniment balancing.</li>
+          </ul>
+        </div>
+
+        <!-- v0.3 -->
+        <div class="p-3.5 rounded-2xl bg-stone-800/50 border border-stone-700/70 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-stone-200">v0.3 — Phrase Looper &amp; Cloth Grip</span>
+            <span class="text-[11px] font-mono text-stone-400">Prototype</span>
+          </div>
+          <ul class="text-xs text-stone-400 space-y-1 list-disc list-inside">
+            <li>Added 12-second real-time performance phrase looper with record, playback, and clear controls.</li>
+            <li>Added <strong class="text-stone-300">Cloth Grip</strong> slider to model wet cloth moisture and stick-slip chatter intensity.</li>
+            <li>Added multi-shell tuning presets (8" Trad A3, 10" Bass F3, 6" High C4).</li>
+          </ul>
+        </div>
+
+        <!-- v0.2 -->
+        <div class="p-3.5 rounded-2xl bg-stone-800/50 border border-stone-700/70 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-stone-200">v0.2 — Samba Groove &amp; Scale Lock</span>
+            <span class="text-[11px] font-mono text-stone-400">Prototype</span>
+          </div>
+          <ul class="text-xs text-stone-400 space-y-1 list-disc list-inside">
+            <li>Built 16-step procedural Samba accompaniment engine (Low/High Surdo + Tamborim) with BPM control.</li>
+            <li>Added <strong class="text-stone-300">Scale Lock</strong> harmonic quantization for Brazilian Samba intervals.</li>
+            <li>Added contact-area finger pressure detection and membrane tap thump transients.</li>
+          </ul>
+        </div>
+
+        <!-- v0.1 -->
+        <div class="p-3.5 rounded-2xl bg-stone-800/50 border border-stone-700/70 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-stone-200">v0.1 — Core Stick-Slip Audio Engine</span>
+            <span class="text-[11px] font-mono text-stone-400">Initial Build</span>
+          </div>
+          <ul class="text-xs text-stone-400 space-y-1 list-disc list-inside">
+            <li>Created dual-zone multi-touch performance stage (Goatskin Head + Internal Bamboo Gambitto).</li>
+            <li>Implemented Web Audio API stick-slip friction synthesis with dual formant filtering and soft-clip saturation.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-stone-800 flex justify-end shrink-0">
+        <button id="doneVersionModalBtn" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs transition">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Control Bar -->
+  <header class="flex items-center justify-between px-3 py-2 sm:px-5 sm:py-2.5 bg-stone-900/90 border-b border-stone-800/90 shrink-0 z-20 gap-2">
+    <div class="flex items-center gap-2">
+      <span class="font-extrabold tracking-tight text-amber-400 text-base sm:text-lg">CUÍCA</span>
+      <button id="versionBadgeBtn" class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 transition flex items-center gap-1" title="View version history & release notes">
+        <span>v0.4</span>
+        <span class="hidden sm:inline text-amber-200/80">ALPHA</span>
+      </button>
+      <button id="audioStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-stone-800 border border-stone-700 text-stone-300">
+        <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+        <span id="statusText">TAP TO START</span>
+      </button>
     </div>
 
-    <!-- Top Studio Header & Controls -->
-    <header class="w-full px-3 pt-2.5 pb-1.5 sm:px-6 sm:pt-3 flex flex-col gap-2 z-20 shrink-0">
-        <div class="flex items-center justify-between gap-2">
-            <!-- Brand & Live Status -->
-            <div class="flex items-center gap-2.5">
-                <div id="audioStatusDot" class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] transition-colors"></div>
-                <div>
-                    <h2 class="text-sm sm:text-base font-extrabold tracking-tight text-amber-100 leading-none">CUÍCA <span class="text-amber-400 font-semibold">PRO</span></h2>
-                    <p class="text-[10px] sm:text-xs text-stone-400 leading-tight mt-0.5 hidden xs:block">Hold drumhead for pitch + rub stick to play</p>
-                </div>
-            </div>
-
-            <!-- Real-time Pitch & Waveform Visualizer -->
-            <div class="flex-1 max-w-[170px] sm:max-w-[230px] h-9 bg-black/45 border border-white/10 rounded-xl px-2 flex items-center gap-2 overflow-hidden">
-                <canvas id="visualizerCanvas" class="w-full h-full block"></canvas>
-                <span id="pitchReadout" class="text-[10px] font-mono font-semibold text-amber-300 w-11 text-right shrink-0">440Hz</span>
-            </div>
-
-            <!-- Controls: Reverb Toggle & Audio Unlock Fallback -->
-            <div class="flex items-center gap-1.5">
-                <button id="reverbToggleBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 bg-amber-500/20 border-amber-400/50 text-amber-200" title="Toggle Samba Hall Ambience">
-                    Hall: ON
-                </button>
-                <button id="headerUnlockBtn" class="hidden px-2.5 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white animate-pulse">
-                    Unmute
-                </button>
-            </div>
-        </div>
-
-        <!-- Tuning Presets & Fine Pitch Bar -->
-        <div class="flex items-center justify-between gap-2 bg-white/[0.04] border border-white/[0.07] rounded-2xl px-2.5 py-1.5">
-            <div class="flex items-center gap-1">
-                <span class="text-[10px] uppercase tracking-wider text-stone-400 font-semibold mr-1 hidden sm:inline">Tuning:</span>
-                <button data-preset="grave" class="preset-btn px-2 py-1 rounded-lg text-[11px] font-semibold transition bg-white/5 text-stone-300 hover:bg-white/10">
-                    Grave
-                </button>
-                <button data-preset="medio" class="preset-btn px-2 py-1 rounded-lg text-[11px] font-semibold transition bg-amber-500 text-stone-950 shadow-sm">
-                    Médio
-                </button>
-                <button data-preset="agudo" class="preset-btn px-2 py-1 rounded-lg text-[11px] font-semibold transition bg-white/5 text-stone-300 hover:bg-white/10">
-                    Agudo
-                </button>
-            </div>
-
-            <div class="flex items-center gap-2 flex-1 max-w-[180px] sm:max-w-[220px]">
-                <span class="text-[10px] text-stone-400 font-medium shrink-0">Pitch</span>
-                <input id="basePitchSlider" type="range" min="220" max="620" value="390" class="w-full">
-            </div>
-        </div>
-
-        <!-- 1-Line Mobile Playing Hint -->
-        <div class="text-center">
-            <p class="text-[11px] text-amber-200/80 font-medium tracking-wide truncate">
-                👆 Press &amp; slide on <strong>drumhead</strong> for pitch + rub <strong>stick</strong> up/down to sing!
-            </p>
-        </div>
-    </header>
-
-    <!-- Main Dual-Touch Performance Stage (Adapts cleanly to Portrait & Landscape) -->
-    <main class="flex-1 w-full max-w-5xl mx-auto px-3 pb-3 pt-1 flex flex-col landscape:flex-row md:flex-row items-center justify-center gap-3 sm:gap-6 overflow-hidden">
-
-        <!-- LEFT / TOP ZONE: Circular Drumhead Pressure & Pitch Pad -->
-        <section class="relative flex-1 w-full h-full flex flex-col items-center justify-center min-h-0">
-            <div class="absolute top-1 left-2 z-10 pointer-events-none flex items-center gap-1.5">
-                <span class="px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[10px] font-semibold uppercase tracking-wider text-amber-200/90">
-                    1. Drumhead Pitch
-                </span>
-            </div>
-
-            <!-- Responsive Square Container for Drumhead -->
-            <div id="drumheadWrapper" class="relative flex items-center justify-center w-full h-full max-w-[330px] max-h-[330px] sm:max-w-[380px] sm:max-h-[380px] aspect-square">
-                <!-- Brass/Wood Outer Rim + Tension Lugs -->
-                <div id="drumheadPad" class="drum-rim relative w-[92%] h-[92%] rounded-full p-[6.5%] flex items-center justify-center cursor-pointer touch-none transition-transform duration-75">
-                    
-                    <!-- Decorative Tuning Lugs around rim -->
-                    <div class="pointer-events-none absolute inset-0 rounded-full">
-                        <div class="absolute top-1 left-1/2 -translate-x-1/2 w-3 h-2 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute bottom-1 left-1/2 -translate-x-1/2 w-3 h-2 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute left-1 top-1/2 -translate-y-1/2 w-2 h-3 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute right-1 top-1/2 -translate-y-1/2 w-2 h-3 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute top-[14%] left-[14%] w-2.5 h-2.5 rotate-45 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute top-[14%] right-[14%] w-2.5 h-2.5 -rotate-45 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute bottom-[14%] left-[14%] w-2.5 h-2.5 -rotate-45 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                        <div class="absolute bottom-[14%] right-[14%] w-2.5 h-2.5 rotate-45 rounded-sm bg-stone-800/80 border border-amber-200/40"></div>
-                    </div>
-
-                    <!-- Calfskin Drumhead Surface -->
-                    <div id="drumSkin" class="drumhead-skin drumhead-grain relative w-full h-full rounded-full overflow-hidden flex items-center justify-center">
-                        
-                        <!-- Pitch Zone Concentric Guide Rings -->
-                        <div class="pointer-events-none absolute inset-[16%] rounded-full border border-amber-900/15"></div>
-                        <div class="pointer-events-none absolute inset-[33%] rounded-full border border-dashed border-amber-900/20"></div>
-                        <div class="pointer-events-none absolute inset-[52%] rounded-full border border-amber-900/15"></div>
-
-                        <!-- Zone Labels -->
-                        <span class="pointer-events-none absolute top-[9%] text-[9px] font-bold uppercase tracking-widest text-amber-950/45">Low</span>
-                        <span class="pointer-events-none absolute top-[26%] text-[9px] font-bold uppercase tracking-widest text-amber-950/50">Mid</span>
-                        <span class="pointer-events-none absolute top-[41%] text-[9px] font-bold uppercase tracking-widest text-amber-950/60">High</span>
-
-                        <!-- Animated Pressure Ripple Ring -->
-                        <div id="pressureRipple" class="pointer-events-none absolute w-24 h-24 rounded-full border-2 border-orange-500/70 bg-orange-400/15 scale-0 opacity-0 transition-opacity duration-150"></div>
-
-                        <!-- Finger Touch Indicator -->
-                        <div id="drumTouchIndicator" class="pointer-events-none absolute w-12 h-12 -ml-6 -mt-6 rounded-full border-2 border-amber-600 bg-amber-500/25 shadow-lg opacity-0 transition-opacity duration-100 flex items-center justify-center">
-                            <div class="w-3 h-3 rounded-full bg-orange-600"></div>
-                        </div>
-
-                        <!-- Central Bamboo Stick Anchor Nub (Where the internal stick is tied into the skin) -->
-                        <div id="centerNub" class="pointer-events-none relative z-10 w-8 h-8 rounded-full bg-gradient-to-br from-amber-700 via-amber-900 to-stone-950 border-2 border-amber-200/70 shadow-md flex items-center justify-center transition-transform duration-75">
-                            <div class="w-3 h-3 rounded-full bg-amber-300/80"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- RIGHT / BOTTOM ZONE: Bamboo Stick & Damp Cloth Friction Pad -->
-        <section class="relative w-full landscape:w-[44%] md:w-[42%] h-[44%] landscape:h-full md:h-full max-h-[420px] flex flex-col items-center justify-center shrink-0">
-            <div class="absolute top-1 left-2 z-10 pointer-events-none flex items-center gap-1.5">
-                <span class="px-2 py-0.5 rounded-full bg-black/50 border border-white/10 text-[10px] font-semibold uppercase tracking-wider text-orange-300">
-                    2. Rub Stick (Up / Down)
-                </span>
-            </div>
-
-            <!-- Touch Track Container -->
-            <div id="stickTrackPad" class="relative w-full h-full bg-gradient-to-b from-[#231b15] via-[#1c1510] to-[#16100c] border border-amber-500/20 rounded-3xl shadow-inner flex items-center justify-center overflow-hidden cursor-ns-resize touch-none">
-                
-                <!-- Background Direction Arrows & Friction Meter -->
-                <div class="pointer-events-none absolute inset-y-4 left-4 flex flex-col justify-between items-center text-stone-500/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7"/></svg>
-                    <span class="text-[9px] font-bold uppercase tracking-widest [writing-mode:vertical-rl] rotate-180 text-stone-500/60">Slide Fast</span>
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
-                </div>
-
-                <!-- Right Side Real-time Friction Energy Bar -->
-                <div class="pointer-events-none absolute inset-y-5 right-4 w-2 rounded-full bg-black/50 border border-white/5 overflow-hidden flex flex-col justify-end">
-                    <div id="frictionEnergyBar" class="w-full h-0 bg-gradient-to-t from-amber-500 via-orange-500 to-yellow-300 rounded-full transition-all duration-75"></div>
-                </div>
-
-                <!-- Vertical Bamboo Stick (Gambita) -->
-                <div class="pointer-events-none relative h-[86%] w-7 sm:w-8 rounded-full bamboo-stick flex flex-col justify-evenly items-center">
-                    <!-- Bamboo Natural Segment Nodes -->
-                    <div class="w-full h-2 bamboo-node"></div>
-                    <div class="w-full h-2 bamboo-node"></div>
-                    <div class="w-full h-2 bamboo-node"></div>
-                </div>
-
-                <!-- Glowing Motion Trail on Stick -->
-                <div id="frictionTrail" class="pointer-events-none absolute w-12 h-24 rounded-full bg-gradient-to-b from-transparent via-orange-400/50 to-transparent blur-md opacity-0 transition-opacity duration-100"></div>
-
-                <!-- Movable Damp Cloth Gripper (Follows user finger Y position) -->
-                <div id="clothGrip" style="top: 50%;" class="pointer-events-none absolute left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 sm:w-28 h-14 sm:h-16 rounded-2xl cloth-grip border-2 border-stone-300 flex flex-col items-center justify-center transition-shadow duration-100">
-                    <!-- Cloth fabric folds / grip lines -->
-                    <div class="w-12 h-1 rounded-full bg-slate-400/50 mb-1.5"></div>
-                    <div class="w-14 h-1 rounded-full bg-slate-400/60 mb-1.5"></div>
-                    <div class="w-12 h-1 rounded-full bg-slate-400/50"></div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <script>
-        /**
-         * Virtual Cuíca Web Audio Synthesizer & Multi-Touch Engine
-         * --------------------------------------------------------
-         * Synthesizes the authentic vocal, squeaky, woody friction timbre of a Brazilian Cuíca
-         * using dual oscillators (sawtooth + triangle), nonlinear waveshaping (stick-slip),
-         * dual resonant formant/bandpass filters, drum body resonance, and algorithmic reverb.
-         */
-        class CuicaAudioEngine {
-            constructor() {
-                this.ctx = null;
-                this.isInitialized = false;
-                this.isReverbOn = true;
-
-                // Synthesis nodes
-                this.oscSaw = null;
-                this.oscTri = null;
-                this.oscSub = null;
-                this.shaper = null;
-                this.bandpassMain = null;
-                this.bandpassFormant = null;
-                this.bodyPeak = null;
-                this.frictionGain = null;
-                this.masterGain = null;
-                this.dryGain = null;
-                this.wetGain = null;
-                this.convolver = null;
-                this.analyser = null;
-
-                // Musical state parameters
-                this.baseFrequency = 390; // Hz (Médio default)
-                this.pitchBendRatio = 1.0; // Controlled by drumhead pressure/position
-                this.currentFrequency = 390;
-                this.targetGain = 0.0;
-                this.frictionVelocity = 0.0;
-            }
-
-            /**
-             * Initializes the Web Audio API graph. Must be called inside a user gesture.
-             */
-            init() {
-                if (this.isInitialized) {
-                    this.resume();
-                    return;
-                }
-
-                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-                this.ctx = new AudioContextClass();
-
-                const now = this.ctx.currentTime;
-
-                // 1. Oscillators: Sawtooth for rich stick-slip harmonics + Triangle for vocal body
-                this.oscSaw = this.ctx.createOscillator();
-                this.oscSaw.type = 'sawtooth';
-                this.oscSaw.frequency.setValueAtTime(this.baseFrequency, now);
-
-                this.oscTri = this.ctx.createOscillator();
-                this.oscTri.type = 'triangle';
-                this.oscTri.frequency.setValueAtTime(this.baseFrequency, now);
-
-                // Subtle octave-up harmonic oscillator to accentuate the characteristic cuíca "squeak"
-                this.oscSqueak = this.ctx.createOscillator();
-                this.oscSqueak.type = 'sine';
-                this.oscSqueak.frequency.setValueAtTime(this.baseFrequency * 2, now);
-
-                const sawMix = this.ctx.createGain();
-                sawMix.gain.value = 0.55;
-
-                const triMix = this.ctx.createGain();
-                triMix.gain.value = 0.65;
-
-                const squeakMix = this.ctx.createGain();
-                squeakMix.gain.value = 0.22;
-
-                // 2. Nonlinear Waveshaper (Simulates bamboo-on-wet-cloth stick-slip micro-grabbing)
-                this.shaper = this.ctx.createWaveShaper();
-                this.shaper.curve = this.makeStickSlipCurve(38);
-                this.shaper.oversample = '2x';
-
-                // 3. Primary Resonant Bandpass Filter (The iconic vocal "oo-ee" formant)
-                this.bandpassMain = this.ctx.createBiquadFilter();
-                this.bandpassMain.type = 'bandpass';
-                this.bandpassMain.frequency.setValueAtTime(this.baseFrequency * 1.85, now);
-                this.bandpassMain.Q.setValueAtTime(7.5, now);
-
-                // 4. Secondary Nasal Formant Filter (Adds monkey-like / laughing vocal throat resonance)
-                this.bandpassFormant = this.ctx.createBiquadFilter();
-                this.bandpassFormant.type = 'peaking';
-                this.bandpassFormant.frequency.setValueAtTime(1150, now);
-                this.bandpassFormant.Q.setValueAtTime(5.0, now);
-                this.bandpassFormant.gain.setValueAtTime(11, now);
-
-                // 5. Drum Shell Wooden/Metal Body Resonance
-                this.bodyPeak = this.ctx.createBiquadFilter();
-                this.bodyPeak.type = 'peaking';
-                this.bodyPeak.frequency.setValueAtTime(260, now);
-                this.bodyPeak.Q.setValueAtTime(3.2, now);
-                this.bodyPeak.gain.setValueAtTime(7.5, now);
-
-                // 6. Friction Envelope VCA (Controlled dynamically by finger rubbing speed)
-                this.frictionGain = this.ctx.createGain();
-                this.frictionGain.gain.setValueAtTime(0.0, now);
-
-                // 7. Master Output & Samba Hall Algorithmic Impulse Reverb
-                this.masterGain = this.ctx.createGain();
-                this.masterGain.gain.setValueAtTime(0.85, now);
-
-                this.dryGain = this.ctx.createGain();
-                this.dryGain.gain.setValueAtTime(0.82, now);
-
-                this.wetGain = this.ctx.createGain();
-                this.wetGain.gain.setValueAtTime(this.isReverbOn ? 0.34 : 0.0, now);
-
-                this.convolver = this.ctx.createConvolver();
-                this.convolver.buffer = this.createRoomImpulse(1.35, 3.2);
-
-                // 8. Real-time Visualizer Analyser
-                this.analyser = this.ctx.createAnalyser();
-                this.analyser.fftSize = 256;
-
-                // Wire up the audio graph
-                this.oscSaw.connect(sawMix);
-                this.oscTri.connect(triMix);
-                this.oscSqueak.connect(squeakMix);
-
-                sawMix.connect(this.shaper);
-                triMix.connect(this.shaper);
-                squeakMix.connect(this.shaper);
-
-                this.shaper.connect(this.bandpassMain);
-                this.bandpassMain.connect(this.bandpassFormant);
-                this.bandpassFormant.connect(this.bodyPeak);
-                this.bodyPeak.connect(this.frictionGain);
-
-                // Dry + Wet Reverb Split
-                this.frictionGain.connect(this.dryGain);
-                this.frictionGain.connect(this.convolver);
-                this.convolver.connect(this.wetGain);
-
-                this.dryGain.connect(this.masterGain);
-                this.wetGain.connect(this.masterGain);
-
-                this.masterGain.connect(this.analyser);
-                this.analyser.connect(this.ctx.destination);
-
-                // Start oscillators continuously (silent until frictionGain opens)
-                this.oscSaw.start(now);
-                this.oscTri.start(now);
-                this.oscSqueak.start(now);
-
-                this.isInitialized = true;
-            }
-
-            /**
-             * Generates a soft-clipping asymmetric waveshaper curve for organic friction grit.
-             */
-            makeStickSlipCurve(amount) {
-                const nSamples = 44100;
-                const curve = new Float32Array(nSamples);
-                const deg = Math.PI / 180;
-                for (let i = 0; i < nSamples; ++i) {
-                    const x = (i * 2) / nSamples - 1;
-                    // Asymmetric saturation produces both even and odd harmonics like real stick-slip friction
-                    curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
-                }
-                return curve;
-            }
-
-            /**
-             * Synthesizes a warm percussion studio / samba hall impulse response buffer.
-             */
-            createRoomImpulse(duration, decay) {
-                const sampleRate = this.ctx.sampleRate;
-                const length = sampleRate * duration;
-                const impulse = this.ctx.createBuffer(2, length, sampleRate);
-                for (let channel = 0; channel < 2; channel++) {
-                    const data = impulse.getChannelData(channel);
-                    for (let i = 0; i < length; i++) {
-                        const env = Math.pow(1 - i / length, decay);
-                        data[i] = (Math.random() * 2 - 1) * env;
-                    }
-                }
-                return impulse;
-            }
-
-            async resume() {
-                if (this.ctx && this.ctx.state === 'suspended') {
-                    await this.ctx.resume();
-                }
-            }
-
-            setBaseFrequency(freq) {
-                this.baseFrequency = freq;
-                this.updatePitchAndFormants(0.03);
-            }
-
-            setPitchBendRatio(ratio) {
-                this.pitchBendRatio = ratio;
-                this.updatePitchAndFormants(0.018);
-            }
-
-            /**
-             * Updates oscillator frequencies and coupled vocal formant filters smoothly.
-             */
-            updatePitchAndFormants(timeConstant = 0.02) {
-                // Slight natural pitch rise when rubbing harder (authentic physical tension effect)
-                const frictionPitchLift = 1 + (this.frictionVelocity * 0.08);
-                const targetFreq = this.baseFrequency * this.pitchBendRatio * frictionPitchLift;
-                this.currentFrequency = targetFreq;
-
-                if (!this.isInitialized) return;
-
-                const now = this.ctx.currentTime;
-                this.oscSaw.frequency.setTargetAtTime(targetFreq, now, timeConstant);
-                this.oscTri.frequency.setTargetAtTime(targetFreq, now, timeConstant);
-                this.oscSqueak.frequency.setTargetAtTime(targetFreq * 2.01, now, timeConstant);
-
-                // Couple the main bandpass filter & vocal formant to the pitch bend
-                // Higher drumhead tension shifts the vocal vowel from "oo" (750Hz) to "ee" (1850Hz)
-                const formantFreq = Math.min(2600, Math.max(580, targetFreq * 2.15));
-                const nasalFreq = Math.min(3100, Math.max(850, 900 + (this.pitchBendRatio - 1) * 1150));
-
-                this.bandpassMain.frequency.setTargetAtTime(formantFreq, now, timeConstant);
-                this.bandpassFormant.frequency.setTargetAtTime(nasalFreq, now, timeConstant);
-            }
-
-            /**
-             * Updates friction amplitude and filter Q excitation based on stick rubbing speed.
-             * @param {number} normalizedSpeed - 0.0 (stopped) to 1.0 (fast rub)
-             * @param {boolean} directionReversed - True on the frame the finger reverses up/down direction
-             */
-            setFrictionExcitation(normalizedSpeed, directionReversed = false) {
-                this.frictionVelocity = normalizedSpeed;
-                if (!this.isInitialized) return;
-
-                const now = this.ctx.currentTime;
-
-                if (directionReversed) {
-                    // Brief realistic dip in sound when reversing stroke direction on the stick
-                    this.frictionGain.gain.cancelScheduledValues(now);
-                    this.frictionGain.gain.setTargetAtTime(0.03, now, 0.008);
-                    return;
-                }
-
-                // Map speed to expressive gain curve
-                const gainVal = normalizedSpeed > 0.01 ? Math.min(0.95, Math.pow(normalizedSpeed, 0.78) * 0.95) : 0.0;
-                const attackRelease = gainVal > 0.02 ? 0.015 : 0.035;
-
-                this.frictionGain.gain.setTargetAtTime(gainVal, now, attackRelease);
-
-                // Faster rubbing excites brighter harmonics (slightly wider Q and slight pitch lift)
-                const dynamicQ = 8.5 - (normalizedSpeed * 2.8);
-                this.bandpassMain.Q.setTargetAtTime(dynamicQ, now, 0.025);
-                this.updatePitchAndFormants(0.02);
-            }
-
-            toggleReverb() {
-                this.isReverbOn = !this.isReverbOn;
-                if (this.isInitialized) {
-                    const now = this.ctx.currentTime;
-                    this.wetGain.gain.setTargetAtTime(this.isReverbOn ? 0.34 : 0.0, now, 0.05);
-                }
-                return this.isReverbOn;
-            }
+    <div class="flex items-center gap-1.5 sm:gap-2.5 flex-wrap justify-end">
+      <!-- Drum Size / Tuning Selector -->
+      <button id="tuningBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 bg-stone-800/90 border-stone-700 text-stone-200 hover:border-amber-500/50" title="Switch Cuíca shell diameter & base pitch">
+        <span class="text-amber-400">◉</span>
+        <span id="tuningLabel">8" Trad (A3)</span>
+      </button>
+
+      <!-- Samba Scale Lock Toggle -->
+      <button id="scaleLockBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition flex items-center gap-1.5 bg-stone-800/90 border-stone-700 text-stone-300 hover:border-emerald-500/50" title="Quantize drumhead bends to Brazilian Samba harmonic intervals">
+        <span id="scaleLockDot" class="w-2 h-2 rounded-full bg-stone-500"></span>
+        <span>Scale: <strong id="scaleLockState">OFF</strong></span>
+      </button>
+
+      <!-- Looper Record / Play / Clear -->
+      <div class="flex items-center rounded-xl border border-stone-700 bg-stone-800/90 overflow-hidden">
+        <button id="loopRecBtn" class="px-2.5 py-1.5 text-xs font-bold text-rose-400 hover:bg-stone-700 transition flex items-center gap-1" title="Record or overdub a 4-bar Cuíca performance loop">
+          <span id="loopRecDot" class="w-2 h-2 rounded-full bg-rose-500"></span>
+          <span id="loopRecText">Loop</span>
+        </button>
+        <button id="loopClearBtn" class="hidden px-2 py-1.5 text-xs font-bold text-stone-400 hover:text-stone-200 hover:bg-stone-700 border-l border-stone-700 transition" title="Clear recorded loop">
+          ✕
+        </button>
+      </div>
+
+      <!-- Samba Groove Toggle -->
+      <button id="sambaBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold border transition flex items-center gap-1.5 bg-stone-800 border-stone-700 text-amber-300 hover:bg-stone-700">
+        <span id="sambaIcon">▶</span>
+        <span>Samba Beat</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Secondary Telemetry, Rosin Dampness, Beat Volume & Tempo Strip -->
+  <div class="flex items-center justify-between px-3 py-1.5 sm:px-5 bg-stone-900/50 border-b border-stone-800/60 text-[11px] text-stone-400 shrink-0 z-10 gap-2 flex-wrap">
+    <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+      <div>PITCH: <span id="pitchReadout" class="font-mono font-bold text-emerald-400">220 Hz (A3)</span></div>
+      <div>PRESS: <span id="pressureReadout" class="font-mono font-bold text-amber-400">0%</span></div>
+      <div class="hidden lg:block">FRICTION: <span id="velocityReadout" class="font-mono font-bold text-orange-400">0%</span></div>
+    </div>
+
+    <div class="flex items-center gap-2.5 sm:gap-4 ml-auto">
+      <!-- Wet Cloth / Rosin Grip Slider -->
+      <div class="flex items-center gap-1.5" title="Adjust wet cloth moisture & stick-slip bite">
+        <label for="clothSlider" class="text-stone-400 font-medium hidden sm:inline">Cloth Grip</label>
+        <label for="clothSlider" class="text-stone-400 font-medium sm:hidden">Grip</label>
+        <input id="clothSlider" type="range" min="20" max="100" value="72" class="w-14 sm:w-20" />
+        <span id="clothValue" class="font-mono font-bold text-amber-300 w-8 text-right">72%</span>
+      </div>
+
+      <!-- Beat Accompaniment Volume Slider -->
+      <div class="flex items-center gap-1.5" title="Adjust Samba beat accompaniment volume">
+        <label for="beatVolSlider" class="text-stone-400 font-medium hidden sm:inline">Beat Vol</label>
+        <label for="beatVolSlider" class="text-stone-400 font-medium sm:hidden">Beat</label>
+        <input id="beatVolSlider" type="range" min="0" max="100" value="75" class="w-14 sm:w-20" />
+        <span id="beatVolValue" class="font-mono font-bold text-emerald-300 w-8 text-right">75%</span>
+      </div>
+
+      <!-- BPM Slider -->
+      <div class="flex items-center gap-1.5">
+        <label for="bpmSlider" class="text-stone-400 font-medium">BPM</label>
+        <input id="bpmSlider" type="range" min="80" max="145" value="108" class="w-14 sm:w-20" />
+        <span id="bpmValue" class="font-mono font-bold text-stone-200 w-7 text-right">108</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Multi-Touch Performance Stage -->
+  <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+
+    <!-- Left / Top Zone: Goatskin Drumhead -->
+    <section class="relative flex-[1.15] md:flex-[1.2] flex flex-col border-b md:border-b-0 md:border-r border-stone-800/90 bg-gradient-to-b from-stone-950 to-stone-900/70 overflow-hidden">
+      <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+        <span class="px-2.5 py-0.5 rounded-full bg-stone-900/80 border border-stone-700/70 text-[10px] font-bold tracking-wider uppercase text-emerald-300">
+          1. Goatskin Head (Pitch &bull; Tap &bull; Pressure)
+        </span>
+        <span class="text-[10px] text-stone-400 hidden sm:inline">Multi-touch &bull; Wider finger = higher pressure</span>
+      </div>
+      <canvas id="drumCanvas" class="w-full h-full"></canvas>
+    </section>
+
+    <!-- Right / Bottom Zone: Internal Bamboo Stick (Gambitto) -->
+    <section class="relative flex-1 flex flex-col bg-gradient-to-b from-stone-900/60 to-stone-950 overflow-hidden">
+      <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
+        <span class="px-2.5 py-0.5 rounded-full bg-stone-900/80 border border-stone-700/70 text-[10px] font-bold tracking-wider uppercase text-amber-300">
+          2. Bamboo Stick / Gambitto (Rub Up &amp; Down)
+        </span>
+        <span id="loopStatusTag" class="hidden px-2 py-0.5 rounded-full bg-rose-950/90 border border-rose-500/40 text-[10px] font-bold text-rose-300">
+          ● REC LOOP
+        </span>
+      </div>
+      <canvas id="stickCanvas" class="w-full h-full"></canvas>
+    </section>
+
+  </main>
+
+  <script>
+    /**
+     * =========================================================================
+     * 1. HARMONIC SCALE & PITCH QUANTIZER (Inspired by Steve Kinney's Octavian)
+     * =========================================================================
+     */
+    const SambaScaleQuantizer = (() => {
+      const SAMBA_INTERVALS = [0, 2, 3, 4, 5, 7, 9, 10, 12, 14, 15, 17, 19];
+      const NOTE_NAMES = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
+
+      function semitonesToFreq(semitones, baseFreq = 220) {
+        return baseFreq * Math.pow(2, semitones / 12);
+      }
+
+      function freqToNoteLabel(freq) {
+        if (!Number.isFinite(freq) || freq <= 0) return "220 Hz (A3)";
+        const midi = Math.round(69 + 12 * Math.log2(freq / 440));
+        const noteName = NOTE_NAMES[((midi % 12) + 12) % 12];
+        const octave = Math.floor(midi / 12) - 1;
+        return `${Math.round(freq)} Hz (${noteName}${octave})`;
+      }
+
+      function quantizeSemitones(rawSemitones, enabled, pressureBend = 0) {
+        if (!enabled) {
+          return rawSemitones + pressureBend;
+        }
+        let nearest = SAMBA_INTERVALS[0];
+        let minDist = Math.abs(rawSemitones - nearest);
+        for (let i = 1; i < SAMBA_INTERVALS.length; i++) {
+          const d = Math.abs(rawSemitones - SAMBA_INTERVALS[i]);
+          if (d < minDist) {
+            minDist = d;
+            nearest = SAMBA_INTERVALS[i];
+          }
+        }
+        const magnetized = nearest + (rawSemitones - nearest) * 0.15;
+        return magnetized + pressureBend;
+      }
+
+      return { semitonesToFreq, freqToNoteLabel, quantizeSemitones };
+    })();
+
+    /**
+     * =========================================================================
+     * 2. DEDICATED VOICE ABSTRACTIONS (Safe Gain Ramps & Clean Teardown)
+     * =========================================================================
+     */
+    function clampSafe(val, min, max, fallback) {
+      if (!Number.isFinite(val)) return fallback;
+      return Math.min(max, Math.max(min, val));
+    }
+
+    function scheduleSafeGain(gainParam, target, time, rampSeconds = 0.015) {
+      const now = time;
+      const safeTarget = clampSafe(target, 0.00001, 1.0, 0.00001);
+      const safeRamp = clampSafe(rampSeconds, 0.003, 1.0, 0.015);
+      gainParam.cancelScheduledValues(now);
+      const currentVal = clampSafe(gainParam.value, 0.00001, 1.0, 0.00001);
+      gainParam.setValueAtTime(currentVal, now);
+      gainParam.exponentialRampToValueAtTime(safeTarget, now + safeRamp);
+    }
+
+    function scheduleSafeFreq(freqParam, target, time, rampSeconds = 0.012) {
+      const now = time;
+      const safeTarget = clampSafe(target, 20, 16000, 220);
+      const safeRamp = clampSafe(rampSeconds, 0.002, 1.0, 0.012);
+      freqParam.cancelScheduledValues(now);
+      const currentVal = clampSafe(freqParam.value, 20, 16000, safeTarget);
+      freqParam.setValueAtTime(currentVal, now);
+      freqParam.exponentialRampToValueAtTime(safeTarget, now + safeRamp);
+    }
+
+    /**
+     * Voice 1: Bamboo Stick-Slip Friction Voice
+     */
+    class StickSlipVoice {
+      constructor(ctx, destination, noiseBuffer) {
+        this.ctx = ctx;
+        this.nodes = [];
+
+        this.coreOsc = ctx.createOscillator();
+        this.coreOsc.type = "sawtooth";
+        this.coreOsc.frequency.value = 220;
+
+        this.subOsc = ctx.createOscillator();
+        this.subOsc.type = "triangle";
+        this.subOsc.frequency.value = 110;
+
+        this.chatterOsc = ctx.createOscillator();
+        this.chatterOsc.type = "sine";
+        this.chatterOsc.frequency.value = 38;
+        this.chatterGain = ctx.createGain();
+        this.chatterGain.gain.value = 0.00001;
+
+        this.noiseSource = ctx.createBufferSource();
+        this.noiseSource.buffer = noiseBuffer;
+        this.noiseSource.loop = true;
+
+        this.noiseFilter = ctx.createBiquadFilter();
+        this.noiseFilter.type = "bandpass";
+        this.noiseFilter.frequency.value = 1800;
+        this.noiseFilter.Q.value = 2.4;
+
+        this.noiseGain = ctx.createGain();
+        this.noiseGain.gain.value = 0.00001;
+
+        this.shaper = ctx.createWaveShaper();
+        this.shaper.curve = this._createSoftClipCurve(256);
+        this.shaper.oversample = "2x";
+
+        this.formant1 = ctx.createBiquadFilter();
+        this.formant1.type = "bandpass";
+        this.formant1.frequency.value = 460;
+        this.formant1.Q.value = 3.2;
+
+        this.formant2 = ctx.createBiquadFilter();
+        this.formant2.type = "peaking";
+        this.formant2.frequency.value = 1150;
+        this.formant2.Q.value = 2.2;
+        this.formant2.gain.value = 6.0;
+
+        this.voiceGain = ctx.createGain();
+        this.voiceGain.gain.value = 0.00001;
+
+        this.chatterOsc.connect(this.chatterGain);
+        this.chatterGain.connect(this.coreOsc.frequency);
+
+        const subMix = ctx.createGain();
+        subMix.gain.value = 0.35;
+        this.subOsc.connect(subMix);
+
+        this.coreOsc.connect(this.shaper);
+        subMix.connect(this.shaper);
+
+        this.noiseSource.connect(this.noiseFilter);
+        this.noiseFilter.connect(this.noiseGain);
+        this.noiseGain.connect(this.shaper);
+
+        this.shaper.connect(this.formant1);
+        this.formant1.connect(this.formant2);
+        this.formant2.connect(this.voiceGain);
+        this.voiceGain.connect(destination);
+
+        this.coreOsc.start(0);
+        this.subOsc.start(0);
+        this.chatterOsc.start(0);
+        this.noiseSource.start(0);
+
+        this.nodes.push(
+          this.coreOsc, this.subOsc, this.chatterOsc, this.chatterGain,
+          this.noiseSource, this.noiseFilter, this.noiseGain, subMix,
+          this.shaper, this.formant1, this.formant2, this.voiceGain
+        );
+      }
+
+      _createSoftClipCurve(samples) {
+        const curve = new Float32Array(samples);
+        for (let i = 0; i < samples; i++) {
+          const x = (i * 2) / samples - 1;
+          curve[i] = Math.tanh(1.8 * x);
+        }
+        return curve;
+      }
+
+      update(freq, velocityNorm, pressureNorm, directionSign, clothGripNorm = 0.72) {
+        const now = this.ctx.currentTime;
+        const safeFreq = clampSafe(freq, 75, 1400, 220);
+        const vel = clampSafe(velocityNorm, 0, 1, 0);
+        const press = clampSafe(pressureNorm, 0, 1, 0);
+        const grip = clampSafe(clothGripNorm, 0.15, 1.0, 0.72);
+
+        const dirFactor = directionSign >= 0 ? 1.0 : 0.965;
+        const targetCore = safeFreq * dirFactor;
+
+        scheduleSafeFreq(this.coreOsc.frequency, targetCore, now, 0.014);
+        scheduleSafeFreq(this.subOsc.frequency, targetCore * 0.5, now, 0.014);
+
+        const chatterRate = 24 + vel * (32 + grip * 22);
+        const chatterDepth = vel > 0.02 ? (2 + vel * (8 + grip * 12)) : 0.00001;
+        scheduleSafeFreq(this.chatterOsc.frequency, chatterRate, now, 0.02);
+        scheduleSafeGain(this.chatterGain.gain, clampSafe(chatterDepth / 100, 0.00001, 0.28, 0.00001), now, 0.02);
+
+        const f1Target = clampSafe(targetCore * 2.05 + press * 180, 180, 2600, 460);
+        const f2Target = clampSafe(targetCore * 4.2 - press * 240, 450, 4200, 1150);
+        scheduleSafeFreq(this.formant1.frequency, f1Target, now, 0.018);
+        scheduleSafeFreq(this.formant2.frequency, f2Target, now, 0.018);
+
+        const breathRatio = 1.25 - grip * 0.65;
+        const noiseAmp = vel > 0.015 ? clampSafe((0.015 + vel * 0.085) * breathRatio * (1 - press * 0.3), 0.00001, 0.18, 0.00001) : 0.00001;
+        scheduleSafeFreq(this.noiseFilter.frequency, clampSafe(1200 + vel * 1800 - press * 400, 400, 5500, 1800), now, 0.02);
+        scheduleSafeGain(this.noiseGain.gain, noiseAmp, now, 0.018);
+
+        const gripGainScale = 0.65 + grip * 0.45;
+        const targetAmp = vel > 0.012 ? clampSafe(Math.pow(vel, 0.78) * 0.48 * gripGainScale, 0.00001, 0.65, 0.00001) : 0.00001;
+        scheduleSafeGain(this.voiceGain.gain, targetAmp, now, vel > 0.012 ? 0.014 : 0.045);
+      }
+
+      dispose() {
+        for (const node of this.nodes) {
+          try { if (typeof node.stop === "function") node.stop(0); } catch (_) {}
+          try { node.disconnect(); } catch (_) {}
+        }
+        this.nodes = [];
+      }
+    }
+
+    /**
+     * Voice 2: Goatskin Finger-Drag Rumble Voice
+     */
+    class SkinRumbleVoice {
+      constructor(ctx, destination, noiseBuffer) {
+        this.ctx = ctx;
+        this.nodes = [];
+
+        this.noiseSource = ctx.createBufferSource();
+        this.noiseSource.buffer = noiseBuffer;
+        this.noiseSource.loop = true;
+
+        this.bandpass = ctx.createBiquadFilter();
+        this.bandpass.type = "bandpass";
+        this.bandpass.frequency.value = 165;
+        this.bandpass.Q.value = 3.5;
+
+        this.lowpass = ctx.createBiquadFilter();
+        this.lowpass.type = "lowpass";
+        this.lowpass.frequency.value = 340;
+
+        this.gain = ctx.createGain();
+        this.gain.gain.value = 0.00001;
+
+        this.noiseSource.connect(this.bandpass);
+        this.bandpass.connect(this.lowpass);
+        this.lowpass.connect(this.gain);
+        this.gain.connect(destination);
+
+        this.noiseSource.start(0);
+        this.nodes.push(this.noiseSource, this.bandpass, this.lowpass, this.gain);
+      }
+
+      update(dragSpeedNorm, pressureNorm, baseFreq) {
+        const now = this.ctx.currentTime;
+        const speed = clampSafe(dragSpeedNorm, 0, 1, 0);
+        const press = clampSafe(pressureNorm, 0, 1, 0);
+
+        const bodyFreq = clampSafe(baseFreq * 0.72 + press * 65, 85, 420, 165);
+        scheduleSafeFreq(this.bandpass.frequency, bodyFreq, now, 0.02);
+        scheduleSafeFreq(this.lowpass.frequency, clampSafe(bodyFreq * 2.1, 160, 900, 340), now, 0.02);
+
+        const targetGain = speed > 0.02 ? clampSafe(speed * (0.09 + press * 0.12), 0.00001, 0.24, 0.00001) : 0.00001;
+        scheduleSafeGain(this.gain.gain, targetGain, now, speed > 0.02 ? 0.018 : 0.05);
+      }
+
+      dispose() {
+        for (const node of this.nodes) {
+          try { if (typeof node.stop === "function") node.stop(0); } catch (_) {}
+          try { node.disconnect(); } catch (_) {}
+        }
+        this.nodes = [];
+      }
+    }
+
+    /**
+     * =========================================================================
+     * 3. MASTER CUÍCA AUDIO ENGINE (Lifecycle, Beat Bus, Transient Cleanup)
+     * =========================================================================
+     */
+    class CuicaAudioEngine {
+      constructor() {
+        this.ctx = null;
+        this.masterGain = null;
+        this.beatGain = null;
+        this.limiter = null;
+        this.noiseBuffer = null;
+        this.stickVoice = null;
+        this.rumbleVoice = null;
+        this.beatVolumeNorm = 0.75;
+        this.isReady = false;
+      }
+
+      unlockSync() {
+        try {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) {
+            throw new Error("Web Audio API is not supported in this browser.");
+          }
+
+          if (!this.ctx || this.ctx.state === "closed") {
+            this.ctx = new AudioCtx();
+            this._buildGraph();
+          }
+
+          if (this.ctx.state === "suspended" || this.ctx.state === "interrupted") {
+            this.ctx.resume();
+          }
+
+          // Synchronous iOS/Safari silent buffer prime + clean disconnect
+          const silentBuf = this.ctx.createBuffer(1, 1, this.ctx.sampleRate);
+          const primeSrc = this.ctx.createBufferSource();
+          primeSrc.buffer = silentBuf;
+          primeSrc.connect(this.ctx.destination);
+          primeSrc.onended = () => {
+            try { primeSrc.disconnect(); } catch (_) {}
+          };
+          primeSrc.start(0);
+
+          this.isReady = true;
+          return { ok: true, sampleRate: this.ctx.sampleRate, state: this.ctx.state };
+        } catch (err) {
+          return { ok: false, error: err.message || String(err) };
+        }
+      }
+
+      _buildGraph() {
+        const ctx = this.ctx;
+
+        const length = ctx.sampleRate * 2;
+        this.noiseBuffer = ctx.createBuffer(1, length, ctx.sampleRate);
+        const data = this.noiseBuffer.getChannelData(0);
+        let b0 = 0, b1 = 0, b2 = 0;
+        for (let i = 0; i < length; i++) {
+          const white = Math.random() * 2 - 1;
+          b0 = 0.997 * b0 + white * 0.029;
+          b1 = 0.985 * b1 + white * 0.032;
+          b2 = 0.950 * b2 + white * 0.048;
+          data[i] = (b0 + b1 + b2 + white * 0.18) * 0.5;
         }
 
-        // =========================================================================
-        // UI & MULTI-TOUCH PERFORMANCE CONTROLLER
-        // =========================================================================
-        document.addEventListener('DOMContentLoaded', () => {
-            const engine = new CuicaAudioEngine();
+        this.limiter = ctx.createDynamicsCompressor();
+        this.limiter.threshold.value = -6.0;
+        this.limiter.knee.value = 6.0;
+        this.limiter.ratio.value = 16.0;
+        this.limiter.attack.value = 0.002;
+        this.limiter.release.value = 0.08;
 
-            // DOM Elements
-            const unlockOverlay = document.getElementById('unlockOverlay');
-            const startAudioBtn = document.getElementById('startAudioBtn');
-            const headerUnlockBtn = document.getElementById('headerUnlockBtn');
-            const audioStatusDot = document.getElementById('audioStatusDot');
-            const reverbToggleBtn = document.getElementById('reverbToggleBtn');
-            const basePitchSlider = document.getElementById('basePitchSlider');
-            const presetBtns = document.querySelectorAll('.preset-btn');
-            const pitchReadout = document.getElementById('pitchReadout');
-            const visualizerCanvas = document.getElementById('visualizerCanvas');
-            const visCtx = visualizerCanvas.getContext('2d');
+        this.masterGain = ctx.createGain();
+        this.masterGain.gain.value = 0.88;
 
-            // Drumhead Elements
-            const drumheadPad = document.getElementById('drumheadPad');
-            const drumSkin = document.getElementById('drumSkin');
-            const drumTouchIndicator = document.getElementById('drumTouchIndicator');
-            const pressureRipple = document.getElementById('pressureRipple');
-            const centerNub = document.getElementById('centerNub');
+        // Dedicated Samba accompaniment sub-mix bus with safe gain ramping
+        this.beatGain = ctx.createGain();
+        this.beatGain.gain.value = clampSafe(this.beatVolumeNorm, 0.00001, 1.0, 0.75);
+        this.beatGain.connect(this.limiter);
 
-            // Stick Elements
-            const stickTrackPad = document.getElementById('stickTrackPad');
-            const clothGrip = document.getElementById('clothGrip');
-            const frictionTrail = document.getElementById('frictionTrail');
-            const frictionEnergyBar = document.getElementById('frictionEnergyBar');
+        this.limiter.connect(this.masterGain);
+        this.masterGain.connect(ctx.destination);
 
-            // Multi-touch Tracking State (Supports simultaneous independent fingers)
-            let drumTouchId = null;      // Active touch identifier on the drumhead
-            let stickTouchId = null;     // Active touch identifier on the bamboo stick
-            let isMouseDownDrum = false;
-            let isMouseDownStick = false;
+        this.stickVoice = new StickSlipVoice(ctx, this.limiter, this.noiseBuffer);
+        this.rumbleVoice = new SkinRumbleVoice(ctx, this.limiter, this.noiseBuffer);
+      }
 
-            // Stick Velocity Calculation State
-            let lastStickY = null;
-            let lastStickTime = 0;
-            let lastDirection = 0; // -1 for up, +1 for down, 0 for stopped
-            let smoothedSpeed = 0;
-            let decayAnimationFrame = null;
+      setBeatVolume(norm) {
+        this.beatVolumeNorm = clampSafe(norm, 0, 1, 0.75);
+        if (!this.isReady || !this.ctx || !this.beatGain) return;
+        const curved = Math.pow(this.beatVolumeNorm, 1.5);
+        scheduleSafeGain(this.beatGain.gain, curved, this.ctx.currentTime, 0.025);
+      }
 
-            // Tuning Presets (Hz)
-            const TUNING_PRESETS = {
-                grave: 285,
-                medio: 390,
-                agudo: 510
-            };
+      updatePerformance({ freq, stickVel, pressure, dragVel, direction, clothGrip }) {
+        if (!this.isReady || !this.ctx) return;
+        if (this.ctx.state === "suspended") {
+          this.ctx.resume();
+        }
+        this.stickVoice.update(freq, stickVel, pressure, direction, clothGrip);
+        this.rumbleVoice.update(dragVel, pressure, freq);
+      }
 
-            // ---------------------------------------------------------------------
-            // 1. Audio Unlock & Context Management
-            // ---------------------------------------------------------------------
-            function activateAudio() {
-                engine.init();
-                engine.resume().then(() => {
-                    unlockOverlay.classList.add('opacity-0', 'pointer-events-none');
-                    setTimeout(() => unlockOverlay.style.display = 'none', 300);
-                    headerUnlockBtn.classList.add('hidden');
-                    audioStatusDot.classList.remove('bg-rose-500', 'shadow-[0_0_8px_rgba(244,63,94,0.8)]');
-                    audioStatusDot.classList.add('bg-emerald-400', 'shadow-[0_0_8px_rgba(52,211,153,0.9)]');
-                    updatePitchDisplay();
-                });
-            }
+      triggerMembraneThump(freq, impactNorm = 0.5) {
+        if (!this.isReady || !this.ctx) return;
+        const ctx = this.ctx;
+        const now = ctx.currentTime;
+        const base = clampSafe(freq * 0.65, 85, 360, 145);
+        const amp = clampSafe(0.14 + impactNorm * 0.22, 0.05, 0.38, 0.2);
 
-            startAudioBtn.addEventListener('click', activateAudio);
-            startAudioBtn.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                activateAudio();
-            }, { passive: false });
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(base * 1.45, now);
+        osc.frequency.exponentialRampToValueAtTime(base * 0.78, now + 0.095);
 
-            headerUnlockBtn.addEventListener('click', activateAudio);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(amp, now + 0.006);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.14);
 
-            // Auto-resume audio context if interrupted by mobile backgrounding
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && engine.isInitialized) {
-                    engine.resume();
-                }
-            });
+        osc.connect(gain);
+        gain.connect(this.limiter);
 
-            // ---------------------------------------------------------------------
-            // 2. Top Controls (Presets, Pitch Slider, Reverb)
-            // ---------------------------------------------------------------------
-            function updatePitchDisplay() {
-                const hz = Math.round(engine.currentFrequency);
-                pitchReadout.textContent = `${hz}Hz`;
-            }
+        osc.onended = () => {
+          try { osc.disconnect(); } catch (_) {}
+          try { gain.disconnect(); } catch (_) {}
+        };
 
-            presetBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const preset = btn.dataset.preset;
-                    const freq = TUNING_PRESETS[preset];
-                    if (!freq) return;
+        osc.start(now);
+        osc.stop(now + 0.15);
+      }
 
-                    basePitchSlider.value = freq;
-                    engine.setBaseFrequency(freq);
-                    updatePitchDisplay();
+      triggerSambaStep(stepIndex) {
+        if (!this.isReady || !this.ctx || !this.beatGain) return;
+        if (this.beatVolumeNorm <= 0.005) return;
 
-                    // Update active button styles
-                    presetBtns.forEach(b => {
-                        b.classList.remove('bg-amber-500', 'text-stone-950', 'shadow-sm');
-                        b.classList.add('bg-white/5', 'text-stone-300');
-                    });
-                    btn.classList.remove('bg-white/5', 'text-stone-300');
-                    btn.classList.add('bg-amber-500', 'text-stone-950', 'shadow-sm');
-                });
-            });
+        const ctx = this.ctx;
+        const now = ctx.currentTime;
 
-            basePitchSlider.addEventListener('input', (e) => {
-                const val = parseFloat(e.target.value);
-                engine.setBaseFrequency(val);
-                updatePitchDisplay();
-                // Clear preset highlight when custom-tuned
-                presetBtns.forEach(b => {
-                    b.classList.remove('bg-amber-500', 'text-stone-950', 'shadow-sm');
-                    b.classList.add('bg-white/5', 'text-stone-300');
-                });
-            });
+        const isLowSurdo = stepIndex === 0 || stepIndex === 8;
+        const isHighSurdo = stepIndex === 4 || stepIndex === 12;
+        const isTamborim = [0, 3, 6, 10, 12, 14].includes(stepIndex);
 
-            reverbToggleBtn.addEventListener('click', () => {
-                const isOn = engine.toggleReverb();
-                reverbToggleBtn.textContent = isOn ? 'Hall: ON' : 'Hall: OFF';
-                if (isOn) {
-                    reverbToggleBtn.className = 'px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 bg-amber-500/20 border-amber-400/50 text-amber-200';
-                } else {
-                    reverbToggleBtn.className = 'px-2.5 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 bg-white/5 border-white/15 text-stone-400';
-                }
-            });
+        if (isLowSurdo || isHighSurdo) {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "sine";
+          const startF = isLowSurdo ? 92 : 138;
+          const endF = isLowSurdo ? 54 : 88;
+          const dur = isLowSurdo ? 0.26 : 0.14;
+          const peak = isLowSurdo ? 0.34 : 0.22;
 
-            // ---------------------------------------------------------------------
-            // 3. Drumhead Pitch & Pressure Interaction (Radial Position -> Pitch Bend)
-            // ---------------------------------------------------------------------
-            function handleDrumheadPress(clientX, clientY) {
-                if (!engine.isInitialized) activateAudio();
+          osc.frequency.setValueAtTime(startF, now);
+          osc.frequency.exponentialRampToValueAtTime(endF, now + dur);
 
-                const rect = drumSkin.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                const maxRadius = rect.width / 2;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(peak, now + 0.008);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
 
-                const dx = clientX - centerX;
-                const dy = clientY - centerY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+          osc.connect(gain);
+          gain.connect(this.beatGain);
+          osc.onended = () => {
+            try { osc.disconnect(); } catch (_) {}
+            try { gain.disconnect(); } catch (_) {}
+          };
+          osc.start(now);
+          osc.stop(now + dur + 0.01);
+        }
 
-                // Normalized distance from center: 0.0 (at stick center) to 1.0 (at outer rim)
-                const normDist = Math.min(1.0, distance / maxRadius);
+        if (isTamborim && this.noiseBuffer) {
+          const src = ctx.createBufferSource();
+          src.buffer = this.noiseBuffer;
 
-                // Pressing closer to the center increases skin tension -> raises pitch up to +1.35 octaves (2.5x)
-                // Pressing near the outer rim lowers pitch slightly (0.88x) for expressive downward bends
-                const tensionFactor = 1.0 - normDist; // 1 at center, 0 at edge
-                const bendRatio = 0.88 + Math.pow(tensionFactor, 1.35) * 1.55;
+          const filter = ctx.createBiquadFilter();
+          filter.type = "bandpass";
+          filter.frequency.value = stepIndex === 14 ? 2600 : 2100;
+          filter.Q.value = 4.5;
 
-                engine.setPitchBendRatio(bendRatio);
-                updatePitchDisplay();
+          const gain = ctx.createGain();
+          const peak = (stepIndex === 0 || stepIndex === 12) ? 0.14 : 0.095;
+          gain.gain.setValueAtTime(0.0001, now);
+          gain.gain.exponentialRampToValueAtTime(peak, now + 0.003);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.055);
 
-                // Position visual finger indicator inside drumSkin coordinates
-                const clampedX = Math.max(0, Math.min(rect.width, clientX - rect.left));
-                const clampedY = Math.max(0, Math.min(rect.height, clientY - rect.top));
+          src.connect(filter);
+          filter.connect(gain);
+          gain.connect(this.beatGain);
 
-                drumTouchIndicator.style.left = `${clampedX}px`;
-                drumTouchIndicator.style.top = `${clampedY}px`;
-                drumTouchIndicator.style.opacity = '1';
+          src.onended = () => {
+            try { src.disconnect(); } catch (_) {}
+            try { filter.disconnect(); } catch (_) {}
+            try { gain.disconnect(); } catch (_) {}
+          };
 
-                // Scale pressure ripple and depress center nub visually
-                const rippleScale = 0.7 + tensionFactor * 1.1;
-                pressureRipple.style.left = `${clampedX - 48}px`;
-                pressureRipple.style.top = `${clampedY - 48}px`;
-                pressureRipple.style.transform = `scale(${rippleScale})`;
-                pressureRipple.style.opacity = '0.85';
+          src.start(now, Math.random() * 0.5, 0.065);
+        }
+      }
+    }
 
-                centerNub.style.transform = `scale(${1 - tensionFactor * 0.16})`;
-                drumheadPad.style.transform = 'scale(0.992)';
-            }
+    /**
+     * =========================================================================
+     * 4. MULTI-TOUCH GESTURE STATE, LOOPER & CRITICALLY-DAMPED PHYSICS LOOP
+     * =========================================================================
+     */
+    const engine = new CuicaAudioEngine();
 
-            function handleDrumheadRelease() {
-                // Smoothly return pitch to baseline tuning when finger lifts off drumhead
-                engine.setPitchBendRatio(1.0);
-                updatePitchDisplay();
+    const DRUM_TUNINGS = [
+      { label: '8" Trad (A3)', baseFreq: 220.0, shellColor: "#451a03" },
+      { label: '10" Bass (F3)', baseFreq: 174.61, shellColor: "#3b1706" },
+      { label: '6" High (C4)', baseFreq: 261.63, shellColor: "#542209" }
+    ];
 
-                drumTouchIndicator.style.opacity = '0';
-                pressureRipple.style.opacity = '0';
-                pressureRipple.style.transform = 'scale(0)';
-                centerNub.style.transform = 'scale(1)';
-                drumheadPad.style.transform = 'scale(1)';
-            }
+    const state = {
+      audioStarted: false,
+      tuningIdx: 0,
+      scaleLock: false,
+      clothGrip: 0.72,
+      beatVolume: 0.75,
+      sambaPlaying: false,
+      bpm: 108,
+      sambaStep: 0,
+      sambaTimer: null,
 
-            // Touch Events for Drumhead
-            drumheadPad.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (drumTouchId === null && e.changedTouches.length > 0) {
-                    const touch = e.changedTouches[0];
-                    drumTouchId = touch.identifier;
-                    handleDrumheadPress(touch.clientX, touch.clientY);
-                }
-            }, { passive: false });
+      // Phrase looper state
+      loopMode: "idle", // "idle" | "recording" | "playing"
+      loopFrames: [],
+      loopStartTime: 0,
+      loopDurationMs: 0,
 
-            drumheadPad.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    const touch = e.changedTouches[i];
-                    if (touch.identifier === drumTouchId) {
-                        handleDrumheadPress(touch.clientX, touch.clientY);
-                        break;
-                    }
-                }
-            }, { passive: false });
+      // Drumhead touches
+      drumTouches: new Map(),
+      baseSemitones: 0,
+      currentFreq: 220,
+      smoothedPressure: 0,
+      smoothedDragVel: 0,
 
-            const endDrumTouch = (e) => {
-                e.preventDefault();
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    if (e.changedTouches[i].identifier === drumTouchId) {
-                        drumTouchId = null;
-                        handleDrumheadRelease();
-                        break;
-                    }
-                }
-            };
-            drumheadPad.addEventListener('touchend', endDrumTouch, { passive: false });
-            drumheadPad.addEventListener('touchcancel', endDrumTouch, { passive: false });
+      // Bamboo stick touch
+      stickTouch: null,
+      smoothedStickVel: 0,
+      stickDirection: 1,
+      stickVisualOffset: 0
+    };
 
-            // Mouse Fallback for Drumhead (Desktop testing)
-            drumheadPad.addEventListener('mousedown', (e) => {
-                isMouseDownDrum = true;
-                handleDrumheadPress(e.clientX, e.clientY);
-            });
-            window.addEventListener('mousemove', (e) => {
-                if (isMouseDownDrum) {
-                    handleDrumheadPress(e.clientX, e.clientY);
-                }
-            });
-            window.addEventListener('mouseup', () => {
-                if (isMouseDownDrum) {
-                    isMouseDownDrum = false;
-                    handleDrumheadRelease();
-                }
-            });
+    // DOM Elements
+    const startOverlay = document.getElementById("startOverlay");
+    const startBtn = document.getElementById("startBtn");
+    const audioErrorMsg = document.getElementById("audioErrorMsg");
+    const audioStatusBadge = document.getElementById("audioStatusBadge");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
 
-            // ---------------------------------------------------------------------
-            // 4. Bamboo Stick & Damp Cloth Friction Mechanic (Velocity -> Sound)
-            // ---------------------------------------------------------------------
-            function updateStickPositionAndVelocity(clientY, isStart = false) {
-                if (!engine.isInitialized) activateAudio();
+    const versionBadgeBtn = document.getElementById("versionBadgeBtn");
+    const versionModal = document.getElementById("versionModal");
+    const closeVersionModalBtn = document.getElementById("closeVersionModalBtn");
+    const doneVersionModalBtn = document.getElementById("doneVersionModalBtn");
 
-                const rect = stickTrackPad.getBoundingClientRect();
-                const padding = 36; // Keep cloth grip comfortably inside track bounds
-                const usableHeight = Math.max(40, rect.height - padding * 2);
-                const relY = Math.max(padding, Math.min(rect.height - padding, clientY - rect.top));
-                const percentY = (relY / rect.height) * 100;
+    const tuningBtn = document.getElementById("tuningBtn");
+    const tuningLabel = document.getElementById("tuningLabel");
 
-                // Move visual damp cloth grip & friction glow trail
-                clothGrip.style.top = `${percentY}%`;
-                frictionTrail.style.top = `${relY - 48}px`;
+    const scaleLockBtn = document.getElementById("scaleLockBtn");
+    const scaleLockDot = document.getElementById("scaleLockDot");
+    const scaleLockState = document.getElementById("scaleLockState");
 
-                const now = performance.now();
+    const loopRecBtn = document.getElementById("loopRecBtn");
+    const loopRecDot = document.getElementById("loopRecDot");
+    const loopRecText = document.getElementById("loopRecText");
+    const loopClearBtn = document.getElementById("loopClearBtn");
+    const loopStatusTag = document.getElementById("loopStatusTag");
 
-                if (isStart || lastStickY === null) {
-                    lastStickY = clientY;
-                    lastStickTime = now;
-                    lastDirection = 0;
-                    return;
-                }
+    const sambaBtn = document.getElementById("sambaBtn");
+    const sambaIcon = document.getElementById("sambaIcon");
+    const bpmSlider = document.getElementById("bpmSlider");
+    const bpmValue = document.getElementById("bpmValue");
+    const clothSlider = document.getElementById("clothSlider");
+    const clothValue = document.getElementById("clothValue");
+    const beatVolSlider = document.getElementById("beatVolSlider");
+    const beatVolValue = document.getElementById("beatVolValue");
 
-                const dy = clientY - lastStickY;
-                const dt = Math.max(4, now - lastStickTime); // ms
+    const pitchReadout = document.getElementById("pitchReadout");
+    const pressureReadout = document.getElementById("pressureReadout");
+    const velocityReadout = document.getElementById("velocityReadout");
 
-                // Detect stroke direction (+1 down, -1 up)
-                const currentDirection = Math.abs(dy) > 1.2 ? Math.sign(dy) : lastDirection;
-                const directionReversed = (lastDirection !== 0 && currentDirection !== 0 && currentDirection !== lastDirection);
+    const drumCanvas = document.getElementById("drumCanvas");
+    const drumCtx = drumCanvas.getContext("2d");
+    const stickCanvas = document.getElementById("stickCanvas");
+    const stickCtx = stickCanvas.getContext("2d");
 
-                // Normalize vertical drag speed relative to track height
-                // A brisk swipe across the stick in ~200ms reaches max excitation (1.0)
-                const pxPerMs = Math.abs(dy) / dt;
-                const referenceVelocity = usableHeight / 210;
-                const rawSpeed = Math.min(1.0, pxPerMs / referenceVelocity);
+    // Version History Modal Handlers
+    function openVersionModal() {
+      versionModal.classList.remove("hidden");
+    }
+    function closeVersionModal() {
+      versionModal.classList.add("hidden");
+    }
+    versionBadgeBtn.addEventListener("pointerdown", openVersionModal);
+    closeVersionModalBtn.addEventListener("pointerdown", closeVersionModal);
+    doneVersionModalBtn.addEventListener("pointerdown", closeVersionModal);
+    versionModal.addEventListener("pointerdown", (e) => {
+      if (e.target === versionModal) closeVersionModal();
+    });
 
-                // Smooth velocity slightly while preserving snappy rhythmic attacks
-                smoothedSpeed = smoothedSpeed * 0.35 + rawSpeed * 0.65;
+    function activateAudio() {
+      const res = engine.unlockSync();
+      if (res.ok) {
+        state.audioStarted = true;
+        engine.setBeatVolume(state.beatVolume);
+        startOverlay.classList.add("opacity-0", "pointer-events-none");
+        statusDot.classList.remove("bg-amber-500", "animate-pulse");
+        statusDot.classList.add("bg-emerald-400");
+        statusText.textContent = `LIVE (${Math.round(res.sampleRate / 1000)}kHz)`;
+        audioStatusBadge.classList.replace("border-stone-700", "border-emerald-500/40");
+      } else {
+        audioErrorMsg.textContent = "Audio Error: " + res.error;
+        audioErrorMsg.classList.remove("hidden");
+      }
+    }
 
-                engine.setFrictionExcitation(smoothedSpeed, directionReversed);
-                updateFrictionVisuals(smoothedSpeed);
-                updatePitchDisplay();
+    startBtn.addEventListener("pointerdown", activateAudio);
+    startOverlay.addEventListener("pointerdown", (e) => {
+      if (e.target === startOverlay) activateAudio();
+    });
+    audioStatusBadge.addEventListener("pointerdown", activateAudio);
 
-                lastStickY = clientY;
-                lastStickTime = now;
-                if (currentDirection !== 0) lastDirection = currentDirection;
-            }
+    // Drum Shell Tuning Toggle
+    tuningBtn.addEventListener("pointerdown", () => {
+      if (!state.audioStarted) activateAudio();
+      state.tuningIdx = (state.tuningIdx + 1) % DRUM_TUNINGS.length;
+      const t = DRUM_TUNINGS[state.tuningIdx];
+      tuningLabel.textContent = t.label;
+      engine.triggerMembraneThump(t.baseFreq, 0.45);
+    });
 
-            function updateFrictionVisuals(speed) {
-                const pct = Math.round(speed * 100);
-                frictionEnergyBar.style.height = `${pct}%`;
+    // Scale Lock Toggle
+    scaleLockBtn.addEventListener("pointerdown", () => {
+      if (!state.audioStarted) activateAudio();
+      state.scaleLock = !state.scaleLock;
+      scaleLockState.textContent = state.scaleLock ? "ON" : "OFF";
+      if (state.scaleLock) {
+        scaleLockBtn.classList.add("border-emerald-500/60", "bg-emerald-950/40", "text-emerald-300");
+        scaleLockDot.classList.replace("bg-stone-500", "bg-emerald-400");
+      } else {
+        scaleLockBtn.classList.remove("border-emerald-500/60", "bg-emerald-950/40", "text-emerald-300");
+        scaleLockDot.classList.replace("bg-emerald-400", "bg-stone-500");
+      }
+    });
 
-                if (speed > 0.08) {
-                    clothGrip.classList.add('friction-glow');
-                    frictionTrail.style.opacity = Math.min(0.95, speed * 1.1).toString();
-                } else {
-                    clothGrip.classList.remove('friction-glow');
-                    frictionTrail.style.opacity = '0';
-                }
-            }
+    // Phrase Looper Controls
+    function updateLooperUI() {
+      if (state.loopMode === "idle") {
+        loopRecText.textContent = "Loop";
+        loopRecDot.className = "w-2 h-2 rounded-full bg-rose-500";
+        loopRecBtn.classList.remove("bg-rose-950/60", "bg-emerald-950/60", "text-emerald-300");
+        loopRecBtn.classList.add("text-rose-400");
+        loopClearBtn.classList.add("hidden");
+        loopStatusTag.classList.add("hidden");
+      } else if (state.loopMode === "recording") {
+        loopRecText.textContent = "Stop Rec";
+        loopRecDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-ping";
+        loopRecBtn.classList.add("bg-rose-950/60");
+        loopClearBtn.classList.remove("hidden");
+        loopStatusTag.textContent = "● REC LOOP";
+        loopStatusTag.className = "px-2 py-0.5 rounded-full bg-rose-950/90 border border-rose-500/40 text-[10px] font-bold text-rose-300";
+      } else if (state.loopMode === "playing") {
+        loopRecText.textContent = "Playing";
+        loopRecDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+        loopRecBtn.classList.remove("bg-rose-950/60", "text-rose-400");
+        loopRecBtn.classList.add("bg-emerald-950/60", "text-emerald-300");
+        loopClearBtn.classList.remove("hidden");
+        loopStatusTag.textContent = "↻ LOOPING";
+        loopStatusTag.className = "px-2 py-0.5 rounded-full bg-emerald-950/90 border border-emerald-500/40 text-[10px] font-bold text-emerald-300";
+      }
+    }
 
-            function stopStickFriction() {
-                lastStickY = null;
-                lastDirection = 0;
-                smoothedSpeed = 0;
-                engine.setFrictionExcitation(0, false);
-                updateFrictionVisuals(0);
-                updatePitchDisplay();
-            }
+    loopRecBtn.addEventListener("pointerdown", () => {
+      if (!state.audioStarted) activateAudio();
+      const now = performance.now();
+      if (state.loopMode === "idle") {
+        state.loopFrames = [];
+        state.loopStartTime = now;
+        state.loopMode = "recording";
+      } else if (state.loopMode === "recording") {
+        state.loopDurationMs = Math.max(400, now - state.loopStartTime);
+        state.loopStartTime = now;
+        state.loopMode = state.loopFrames.length > 0 ? "playing" : "idle";
+      } else if (state.loopMode === "playing") {
+        state.loopMode = "idle";
+        state.loopFrames = [];
+      }
+      updateLooperUI();
+    });
 
-            // Continuous Velocity Decay Loop:
-            // Crucial for friction synthesis: if the user holds their finger still on the stick without moving,
-            // velocity drops to 0 within ~45ms so the cuíca goes silent just like a real friction drum!
-            function runFrictionDecayLoop() {
-                const isHoldingStick = (stickTouchId !== null || isMouseDownStick);
-                if (isHoldingStick && lastStickTime > 0) {
-                    const elapsedSinceMove = performance.now() - lastStickTime;
-                    if (elapsedSinceMove > 28) {
-                        smoothedSpeed *= 0.62;
-                        if (smoothedSpeed < 0.015) {
-                            smoothedSpeed = 0;
-                        }
-                        engine.setFrictionExcitation(smoothedSpeed, false);
-                        updateFrictionVisuals(smoothedSpeed);
-                        updatePitchDisplay();
-                    }
-                }
-                decayAnimationFrame = requestAnimationFrame(runFrictionDecayLoop);
-            }
-            runFrictionDecayLoop();
+    loopClearBtn.addEventListener("pointerdown", () => {
+      state.loopMode = "idle";
+      state.loopFrames = [];
+      updateLooperUI();
+    });
 
-            // Touch Events for Bamboo Stick
-            stickTrackPad.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (stickTouchId === null && e.changedTouches.length > 0) {
-                    const touch = e.changedTouches[0];
-                    stickTouchId = touch.identifier;
-                    updateStickPositionAndVelocity(touch.clientY, true);
-                }
-            }, { passive: false });
+    // Samba Groove Sequencer
+    function restartSambaClock() {
+      if (state.sambaTimer) {
+        clearInterval(state.sambaTimer);
+        state.sambaTimer = null;
+      }
+      if (!state.sambaPlaying) return;
+      const sixteenthMs = (60 / state.bpm / 4) * 1000;
+      state.sambaTimer = setInterval(() => {
+        engine.triggerSambaStep(state.sambaStep);
+        state.sambaStep = (state.sambaStep + 1) % 16;
+      }, sixteenthMs);
+    }
 
-            stickTrackPad.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    const touch = e.changedTouches[i];
-                    if (touch.identifier === stickTouchId) {
-                        updateStickPositionAndVelocity(touch.clientY, false);
-                        break;
-                    }
-                }
-            }, { passive: false });
+    sambaBtn.addEventListener("pointerdown", () => {
+      if (!state.audioStarted) activateAudio();
+      state.sambaPlaying = !state.sambaPlaying;
+      if (state.sambaPlaying) {
+        state.sambaStep = 0;
+        sambaIcon.textContent = "■";
+        sambaBtn.classList.add("bg-amber-500/20", "border-amber-400");
+        engine.triggerSambaStep(0);
+        state.sambaStep = 1;
+        restartSambaClock();
+      } else {
+        sambaIcon.textContent = "▶";
+        sambaBtn.classList.remove("bg-amber-500/20", "border-amber-400");
+        restartSambaClock();
+      }
+    });
 
-            const endStickTouch = (e) => {
-                e.preventDefault();
-                for (let i = 0; i < e.changedTouches.length; i++) {
-                    if (e.changedTouches[i].identifier === stickTouchId) {
-                        stickTouchId = null;
-                        stopStickFriction();
-                        break;
-                    }
-                }
-            };
-            stickTrackPad.addEventListener('touchend', endStickTouch, { passive: false });
-            stickTrackPad.addEventListener('touchcancel', endStickTouch, { passive: false });
+    bpmSlider.addEventListener("input", () => {
+      state.bpm = Number(bpmSlider.value);
+      bpmValue.textContent = state.bpm;
+      if (state.sambaPlaying) restartSambaClock();
+    });
 
-            // Mouse Fallback for Bamboo Stick (Desktop testing)
-            stickTrackPad.addEventListener('mousedown', (e) => {
-                isMouseDownStick = true;
-                updateStickPositionAndVelocity(e.clientY, true);
-            });
-            window.addEventListener('mousemove', (e) => {
-                if (isMouseDownStick) {
-                    updateStickPositionAndVelocity(e.clientY, false);
-                }
-            });
-            window.addEventListener('mouseup', () => {
-                if (isMouseDownStick) {
-                    isMouseDownStick = false;
-                    stopStickFriction();
-                }
-            });
+    clothSlider.addEventListener("input", () => {
+      const val = Number(clothSlider.value);
+      state.clothGrip = val / 100;
+      clothValue.textContent = `${val}%`;
+    });
 
-            // ---------------------------------------------------------------------
-            // 5. Real-Time Oscilloscope Waveform Visualizer
-            // ---------------------------------------------------------------------
-            function resizeVisualizer() {
-                const dpr = window.devicePixelRatio || 1;
-                const rect = visualizerCanvas.getBoundingClientRect();
-                visualizerCanvas.width = rect.width * dpr;
-                visualizerCanvas.height = rect.height * dpr;
-                visCtx.scale(dpr, dpr);
-            }
-            window.addEventListener('resize', resizeVisualizer);
-            resizeVisualizer();
+    beatVolSlider.addEventListener("input", () => {
+      if (!state.audioStarted) activateAudio();
+      const val = Number(beatVolSlider.value);
+      state.beatVolume = val / 100;
+      beatVolValue.textContent = `${val}%`;
+      engine.setBeatVolume(state.beatVolume);
+    });
 
-            const dataArray = new Uint8Array(128);
+    /**
+     * Contact-Size Pressure Extraction (Finger footprint width/height + desktop Shift/Wheel)
+     */
+    function computeContactPressure(e, wheelBoost = 0) {
+      const w = e.width && e.width > 1 ? e.width : 20;
+      const h = e.height && e.height > 1 ? e.height : 20;
+      const area = w * h;
+      const areaNorm = clampSafe((area - 324) / (2116 - 324), 0, 1, 0.15);
+      const forceNorm = (typeof e.pressure === "number" && e.pressure > 0 && e.pressure !== 0.5)
+        ? clampSafe(e.pressure, 0, 1, 0)
+        : 0;
+      const shiftBoost = e.shiftKey ? 0.55 : 0;
+      return clampSafe(Math.max(areaNorm, forceNorm * 0.85) + shiftBoost + wheelBoost, 0, 1, 0.15);
+    }
 
-            function drawVisualizer() {
-                const rect = visualizerCanvas.getBoundingClientRect();
-                const width = rect.width;
-                const height = rect.height;
+    /**
+     * Drumhead Multi-Touch Handlers
+     */
+    drumCanvas.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      if (!state.audioStarted) activateAudio();
+      drumCanvas.setPointerCapture(e.pointerId);
 
-                visCtx.clearRect(0, 0, width, height);
+      const rect = drumCanvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const pressure = computeContactPressure(e);
 
-                visCtx.lineWidth = 2;
-                visCtx.strokeStyle = smoothedSpeed > 0.05 ? '#fb923c' : 'rgba(245, 158, 11, 0.35)';
-                visCtx.beginPath();
+      state.drumTouches.set(e.pointerId, {
+        x, y,
+        prevX: x, prevY: y,
+        pressure,
+        wheelBoost: 0,
+        dragVel: 0
+      });
 
-                if (engine.isInitialized && engine.analyser) {
-                    engine.analyser.getByteTimeDomainData(dataArray);
-                    const sliceWidth = width / dataArray.length;
-                    let x = 0;
+      recomputeDrumheadTargets();
+      engine.triggerMembraneThump(state.currentFreq, pressure);
+    });
 
-                    for (let i = 0; i < dataArray.length; i++) {
-                        const v = dataArray[i] / 128.0;
-                        const y = (v * height) / 2;
-                        if (i === 0) {
-                            visCtx.moveTo(x, y);
-                        } else {
-                            visCtx.lineTo(x, y);
-                        }
-                        x += sliceWidth;
-                    }
-                } else {
-                    visCtx.moveTo(0, height / 2);
-                    visCtx.lineTo(width, height / 2);
-                }
+    drumCanvas.addEventListener("pointermove", (e) => {
+      if (!state.drumTouches.has(e.pointerId)) return;
+      e.preventDefault();
 
-                visCtx.stroke();
-                requestAnimationFrame(drawVisualizer);
-            }
-            drawVisualizer();
-        });
-    </script>
+      const events = typeof e.getCoalescedEvents === "function" ? e.getCoalescedEvents() : [e];
+      const latest = events[events.length - 1];
+      const rect = drumCanvas.getBoundingClientRect();
+      const touch = state.drumTouches.get(e.pointerId);
+
+      let totalDist = 0;
+      let curX = touch.x;
+      let curY = touch.y;
+      for (const ev of events) {
+        const nx = ev.clientX - rect.left;
+        const ny = ev.clientY - rect.top;
+        totalDist += Math.hypot(nx - curX, ny - curY);
+        curX = nx;
+        curY = ny;
+      }
+
+      touch.prevX = touch.x;
+      touch.prevY = touch.y;
+      touch.x = curX;
+      touch.y = curY;
+      touch.pressure = computeContactPressure(latest, touch.wheelBoost);
+      touch.dragVel = clampSafe(totalDist / 28, 0, 1, 0);
+
+      recomputeDrumheadTargets();
+    });
+
+    drumCanvas.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      for (const touch of state.drumTouches.values()) {
+        touch.wheelBoost = clampSafe(touch.wheelBoost - e.deltaY * 0.0015, 0, 0.85, 0);
+        touch.pressure = clampSafe(touch.pressure - e.deltaY * 0.0015, 0, 1, 0.2);
+      }
+      recomputeDrumheadTargets();
+    }, { passive: false });
+
+    function releaseDrumTouch(e) {
+      if (state.drumTouches.has(e.pointerId)) {
+        state.drumTouches.delete(e.pointerId);
+        recomputeDrumheadTargets();
+      }
+    }
+    drumCanvas.addEventListener("pointerup", releaseDrumTouch);
+    drumCanvas.addEventListener("pointercancel", releaseDrumTouch);
+
+    function recomputeDrumheadTargets() {
+      if (state.drumTouches.size === 0) {
+        state.baseSemitones = 0;
+        return;
+      }
+
+      const rect = drumCanvas.getBoundingClientRect();
+      const cx = rect.width * 0.5;
+      const cy = rect.height * 0.5;
+      const maxR = Math.min(cx, cy) * 0.85 || 120;
+
+      let weightedSemitones = 0;
+      let totalWeight = 0;
+
+      for (const t of state.drumTouches.values()) {
+        const distFromCenter = Math.hypot(t.x - cx, t.y - cy);
+        const radialNorm = clampSafe(distFromCenter / maxR, 0, 1.2, 0.5);
+        const posSemitones = radialNorm * 14;
+        const weight = 0.4 + t.pressure * 0.9;
+        weightedSemitones += posSemitones * weight;
+        totalWeight += weight;
+      }
+
+      state.baseSemitones = totalWeight > 0 ? weightedSemitones / totalWeight : 0;
+    }
+
+    /**
+     * Bamboo Stick (Gambitto) Multi-Touch Handlers
+     */
+    stickCanvas.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      if (!state.audioStarted) activateAudio();
+      stickCanvas.setPointerCapture(e.pointerId);
+
+      const rect = stickCanvas.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      state.stickTouch = {
+        pointerId: e.pointerId,
+        y,
+        prevY: y,
+        rawVel: 0.25,
+        lastTime: performance.now()
+      };
+    });
+
+    stickCanvas.addEventListener("pointermove", (e) => {
+      if (!state.stickTouch || state.stickTouch.pointerId !== e.pointerId) return;
+      e.preventDefault();
+
+      const events = typeof e.getCoalescedEvents === "function" ? e.getCoalescedEvents() : [e];
+      const rect = stickCanvas.getBoundingClientRect();
+      const now = performance.now();
+      const dt = Math.max(4, now - state.stickTouch.lastTime);
+
+      let dySum = 0;
+      let lastSignedDy = 0;
+      let curY = state.stickTouch.y;
+
+      for (const ev of events) {
+        const ny = ev.clientY - rect.top;
+        const delta = ny - curY;
+        dySum += Math.abs(delta);
+        if (Math.abs(delta) > 0.1) lastSignedDy = delta;
+        curY = ny;
+      }
+
+      const speedPxPerMs = dySum / dt;
+      const normVel = clampSafe(speedPxPerMs / 2.6, 0, 1, 0);
+
+      state.stickTouch.prevY = state.stickTouch.y;
+      state.stickTouch.y = curY;
+      state.stickTouch.rawVel = normVel;
+      state.stickTouch.lastTime = now;
+
+      if (lastSignedDy !== 0) {
+        state.stickDirection = lastSignedDy > 0 ? 1 : -1;
+      }
+      state.stickVisualOffset = clampSafe(state.stickVisualOffset + lastSignedDy * 0.35, -36, 36, 0);
+    });
+
+    function releaseStickTouch(e) {
+      if (state.stickTouch && state.stickTouch.pointerId === e.pointerId) {
+        state.stickTouch = null;
+      }
+    }
+    stickCanvas.addEventListener("pointerup", releaseStickTouch);
+    stickCanvas.addEventListener("pointercancel", releaseStickTouch);
+
+    /**
+     * =========================================================================
+     * 5. FIXED-CADENCE PHYSICS, LOOPER PLAYBACK & CANVAS RENDERING LOOP
+     * =========================================================================
+     */
+    function resizeCanvases() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      for (const canvas of [drumCanvas, stickCanvas]) {
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width > 0 && rect.height > 0) {
+          canvas.width = Math.round(rect.width * dpr);
+          canvas.height = Math.round(rect.height * dpr);
+        }
+      }
+    }
+    window.addEventListener("resize", resizeCanvases);
+    resizeCanvases();
+
+    let lastFrameTime = performance.now();
+
+    function sampleLoopFrame(elapsedMs) {
+      if (state.loopFrames.length === 0 || state.loopDurationMs <= 0) return null;
+      const t = elapsedMs % state.loopDurationMs;
+      let lo = 0, hi = state.loopFrames.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi + 1) >> 1;
+        if (state.loopFrames[mid].t <= t) lo = mid;
+        else hi = mid - 1;
+      }
+      return state.loopFrames[lo];
+    }
+
+    function frameLoop(now) {
+      const dt = Math.min(0.05, Math.max(0.001, (now - lastFrameTime) / 1000));
+      lastFrameTime = now;
+
+      // 1. Aggregate live drumhead pressure and drag velocity
+      let targetPressure = 0;
+      let targetDragVel = 0;
+      for (const t of state.drumTouches.values()) {
+        targetPressure = Math.max(targetPressure, t.pressure);
+        targetDragVel = Math.max(targetDragVel, t.dragVel);
+        t.dragVel *= Math.exp(-dt * 18);
+      }
+
+      const pressAlpha = 1 - Math.exp(-dt * 28);
+      state.smoothedPressure += (targetPressure - state.smoothedPressure) * pressAlpha;
+      state.smoothedDragVel += (targetDragVel - state.smoothedDragVel) * pressAlpha;
+
+      // 2. Bamboo stick velocity decay & smoothing
+      let targetStickVel = 0;
+      if (state.stickTouch) {
+        const idleMs = now - state.stickTouch.lastTime;
+        const idleDecay = idleMs > 28 ? Math.exp(-(idleMs - 28) / 45) : 1;
+        targetStickVel = state.stickTouch.rawVel * idleDecay;
+      }
+      const stickAlpha = 1 - Math.exp(-dt * 32);
+      state.smoothedStickVel += (targetStickVel - state.smoothedStickVel) * stickAlpha;
+      state.stickVisualOffset *= Math.exp(-dt * 14);
+
+      // 3. Compute live musical pitch
+      const tuningBase = DRUM_TUNINGS[state.tuningIdx].baseFreq;
+      const pressureBend = state.smoothedPressure * 5.0;
+      const finalSemitones = SambaScaleQuantizer.quantizeSemitones(
+        state.baseSemitones,
+        state.scaleLock,
+        pressureBend
+      );
+      const liveFreq = SambaScaleQuantizer.semitonesToFreq(finalSemitones, tuningBase);
+
+      // 4. Looper record / playback blending
+      let outFreq = liveFreq;
+      let outStickVel = state.smoothedStickVel;
+      let outPressure = state.smoothedPressure;
+      let outDragVel = state.smoothedDragVel;
+      let outDirection = state.stickDirection;
+
+      if (state.loopMode === "recording") {
+        const elapsed = now - state.loopStartTime;
+        if (elapsed >= 12000) {
+          state.loopDurationMs = 12000;
+          state.loopStartTime = now;
+          state.loopMode = state.loopFrames.length > 0 ? "playing" : "idle";
+          updateLooperUI();
+        } else {
+          state.loopFrames.push({
+            t: elapsed,
+            freq: liveFreq,
+            stickVel: state.smoothedStickVel,
+            pressure: state.smoothedPressure,
+            dragVel: state.smoothedDragVel,
+            direction: state.stickDirection
+          });
+        }
+      } else if (state.loopMode === "playing") {
+        const looped = sampleLoopFrame(now - state.loopStartTime);
+        if (looped) {
+          if (state.smoothedStickVel < 0.03) {
+            outFreq = looped.freq;
+            outStickVel = looped.stickVel;
+            outPressure = Math.max(outPressure, looped.pressure);
+            outDragVel = Math.max(outDragVel, looped.dragVel);
+            outDirection = looped.direction;
+          }
+        }
+      }
+
+      state.currentFreq = outFreq;
+
+      // 5. Push smoothed parameters to audio engine
+      engine.updatePerformance({
+        freq: outFreq,
+        stickVel: outStickVel,
+        pressure: outPressure,
+        dragVel: outDragVel,
+        direction: outDirection,
+        clothGrip: state.clothGrip
+      });
+
+      // 6. Update telemetry readouts
+      pitchReadout.textContent = SambaScaleQuantizer.freqToNoteLabel(outFreq);
+      pressureReadout.textContent = `${Math.round(outPressure * 100)}%`;
+      velocityReadout.textContent = `${Math.round(outStickVel * 100)}%`;
+
+      // 7. Render canvases
+      renderDrumhead(now, outStickVel);
+      renderBambooStick(now, outStickVel);
+
+      requestAnimationFrame(frameLoop);
+    }
+
+    function renderDrumhead(now, activeVel) {
+      const w = drumCanvas.width;
+      const h = drumCanvas.height;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      drumCtx.clearRect(0, 0, w, h);
+
+      const cx = w * 0.5;
+      const cy = h * 0.5;
+      const outerR = Math.min(cx, cy) * 0.84;
+      const rimR = outerR * 0.91;
+
+      const vibAmp = activeVel * 6 * dpr * Math.sin(now * 0.07);
+
+      drumCtx.save();
+      drumCtx.beginPath();
+      drumCtx.arc(cx, cy, outerR, 0, Math.PI * 2);
+      drumCtx.fillStyle = DRUM_TUNINGS[state.tuningIdx].shellColor;
+      drumCtx.fill();
+      drumCtx.lineWidth = 4 * dpr;
+      drumCtx.strokeStyle = "#b45309";
+      drumCtx.stroke();
+
+      const lugCount = 8;
+      for (let i = 0; i < lugCount; i++) {
+        const ang = (i / lugCount) * Math.PI * 2;
+        const lx = cx + Math.cos(ang) * (outerR * 0.955);
+        const ly = cy + Math.sin(ang) * (outerR * 0.955);
+        drumCtx.beginPath();
+        drumCtx.arc(lx, ly, 4.5 * dpr, 0, Math.PI * 2);
+        drumCtx.fillStyle = "#fbbf24";
+        drumCtx.fill();
+      }
+
+      const skinGrad = drumCtx.createRadialGradient(
+        cx - rimR * 0.15,
+        cy - rimR * 0.15,
+        rimR * 0.08,
+        cx,
+        cy,
+        rimR + vibAmp
+      );
+      skinGrad.addColorStop(0, "#fef3c7");
+      skinGrad.addColorStop(0.65, "#fde68a");
+      skinGrad.addColorStop(1, "#d97706");
+
+      drumCtx.beginPath();
+      drumCtx.arc(cx, cy, Math.max(10, rimR + vibAmp), 0, Math.PI * 2);
+      drumCtx.fillStyle = skinGrad;
+      drumCtx.fill();
+
+      drumCtx.strokeStyle = "rgba(120, 53, 15, 0.18)";
+      drumCtx.lineWidth = 1.5 * dpr;
+      for (const ratio of [0.33, 0.66]) {
+        drumCtx.beginPath();
+        drumCtx.arc(cx, cy, rimR * ratio, 0, Math.PI * 2);
+        drumCtx.stroke();
+      }
+
+      drumCtx.beginPath();
+      drumCtx.arc(cx, cy, 11 * dpr + activeVel * 3 * dpr, 0, Math.PI * 2);
+      drumCtx.fillStyle = "#78350f";
+      drumCtx.fill();
+      drumCtx.strokeStyle = "#fef3c7";
+      drumCtx.lineWidth = 2 * dpr;
+      drumCtx.stroke();
+
+      for (const t of state.drumTouches.values()) {
+        const tx = t.x * dpr;
+        const ty = t.y * dpr;
+        const contactR = (22 + t.pressure * 28) * dpr;
+
+        const shadowGrad = drumCtx.createRadialGradient(tx, ty, 2 * dpr, tx, ty, contactR * 1.35);
+        shadowGrad.addColorStop(0, "rgba(120, 53, 15, 0.42)");
+        shadowGrad.addColorStop(1, "rgba(120, 53, 15, 0)");
+        drumCtx.beginPath();
+        drumCtx.arc(tx, ty, contactR * 1.35, 0, Math.PI * 2);
+        drumCtx.fillStyle = shadowGrad;
+        drumCtx.fill();
+
+        drumCtx.beginPath();
+        drumCtx.arc(tx, ty, contactR, 0, Math.PI * 2);
+        drumCtx.strokeStyle = "#059669";
+        drumCtx.lineWidth = 3 * dpr;
+        drumCtx.stroke();
+
+        drumCtx.fillStyle = "#064e3b";
+        drumCtx.font = `bold ${Math.round(11 * dpr)}px sans-serif`;
+        drumCtx.textAlign = "center";
+        drumCtx.fillText(`${Math.round(t.pressure * 100)}%`, tx, ty - contactR - 6 * dpr);
+      }
+      drumCtx.restore();
+    }
+
+    function renderBambooStick(now, activeVel) {
+      const w = stickCanvas.width;
+      const h = stickCanvas.height;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      stickCtx.clearRect(0, 0, w, h);
+
+      const cx = w * 0.5;
+      const stickW = Math.min(46 * dpr, w * 0.16);
+      const topY = h * 0.14;
+      const botY = h * 0.88;
+      const stickH = botY - topY;
+
+      stickCtx.save();
+
+      const glowAlpha = 0.08 + activeVel * 0.32;
+      const bgGlow = stickCtx.createRadialGradient(cx, h * 0.5, 10 * dpr, cx, h * 0.5, Math.max(w, h) * 0.48);
+      bgGlow.addColorStop(0, `rgba(245, 158, 11, ${glowAlpha})`);
+      bgGlow.addColorStop(1, "rgba(12, 10, 9, 0)");
+      stickCtx.fillStyle = bgGlow;
+      stickCtx.fillRect(0, 0, w, h);
+
+      const shaftGrad = stickCtx.createLinearGradient(cx - stickW * 0.5, 0, cx + stickW * 0.5, 0);
+      shaftGrad.addColorStop(0, "#92400e");
+      shaftGrad.addColorStop(0.35, "#fbbf24");
+      shaftGrad.addColorStop(0.7, "#d97706");
+      shaftGrad.addColorStop(1, "#78350f");
+
+      const shiftY = state.stickVisualOffset * dpr;
+      stickCtx.fillStyle = shaftGrad;
+      stickCtx.beginPath();
+      stickCtx.roundRect(cx - stickW * 0.5, topY + shiftY * 0.25, stickW, stickH, 12 * dpr);
+      stickCtx.fill();
+
+      stickCtx.strokeStyle = "#78350f";
+      stickCtx.lineWidth = 3 * dpr;
+      for (let i = 1; i <= 4; i++) {
+        const ny = topY + (stickH / 5) * i + shiftY * 0.45;
+        stickCtx.beginPath();
+        stickCtx.moveTo(cx - stickW * 0.52, ny);
+        stickCtx.lineTo(cx + stickW * 0.52, ny);
+        stickCtx.stroke();
+      }
+
+      if (state.stickTouch) {
+        const ty = state.stickTouch.y * dpr;
+        const clothW = stickW * 1.9;
+        const clothH = 44 * dpr;
+
+        stickCtx.fillStyle = "rgba(245, 245, 244, 0.22)";
+        stickCtx.strokeStyle = "#f59e0b";
+        stickCtx.lineWidth = 2.5 * dpr;
+        stickCtx.beginPath();
+        stickCtx.roundRect(cx - clothW * 0.5, ty - clothH * 0.5, clothW, clothH, 14 * dpr);
+        stickCtx.fill();
+        stickCtx.stroke();
+
+        if (activeVel > 0.04) {
+          const rippleR = (28 + activeVel * 48) * dpr;
+          stickCtx.beginPath();
+          stickCtx.arc(cx, ty, rippleR, 0, Math.PI * 2);
+          stickCtx.strokeStyle = `rgba(251, 191, 36, ${0.45 * activeVel})`;
+          stickCtx.lineWidth = 2 * dpr;
+          stickCtx.stroke();
+        }
+      } else {
+        stickCtx.fillStyle = "rgba(254, 243, 199, 0.55)";
+        stickCtx.font = `600 ${Math.round(12 * dpr)}px sans-serif`;
+        stickCtx.textAlign = "center";
+        stickCtx.fillText("↕ SLIDE FINGER HERE", cx, h * 0.5);
+      }
+
+      stickCtx.restore();
+    }
+
+    requestAnimationFrame(frameLoop);
+  </script>
 </body>
 </html>
