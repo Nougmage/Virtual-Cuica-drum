@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>Cuíca v0.4 (Alpha Test) — Virtual Brazilian Friction Drum</title>
+  <title>Cuíca v0.4.1 (Alpha Test) — Virtual Brazilian Friction Drum</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * {
@@ -64,7 +64,7 @@
       </div>
       <div>
         <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[11px] font-bold uppercase tracking-wider mb-2">
-          v0.4 &bull; Alpha Test
+          v0.4.1 &bull; Alpha Test
         </div>
         <h1 class="text-2xl font-extrabold tracking-tight text-amber-400">Brazilian Cuíca</h1>
         <p class="text-xs uppercase tracking-widest text-stone-400 mt-1">Multi-Touch Friction Drum Studio</p>
@@ -86,7 +86,7 @@
         <div>
           <h2 class="text-lg font-extrabold text-amber-400 flex items-center gap-2">
             <span>Version History</span>
-            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 border border-amber-400/40 text-amber-300">v0.4 Alpha Test</span>
+            <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/20 border border-amber-400/40 text-amber-300">v0.4.1 Alpha Test</span>
           </h2>
           <p class="text-xs text-stone-400 mt-0.5">Release changelog &amp; build milestones</p>
         </div>
@@ -96,16 +96,28 @@
       </div>
 
       <div class="overflow-y-auto pr-1 space-y-4 text-left select-text">
-        <!-- v0.4 -->
+        <!-- v0.4.1 -->
         <div class="p-3.5 rounded-2xl bg-amber-950/25 border border-amber-500/30 space-y-1.5">
           <div class="flex items-center justify-between">
-            <span class="text-sm font-bold text-amber-300">v0.4 — Alpha Test (Current)</span>
+            <span class="text-sm font-bold text-amber-300">v0.4.1 — Alpha Test (Current)</span>
             <span class="text-[11px] font-mono text-amber-400/80">2026-11-18</span>
           </div>
           <ul class="text-xs text-stone-300 space-y-1 list-disc list-inside">
-            <li>Promoted build to <strong class="text-stone-100">Alpha Test (v0.4)</strong> and standardized entry point as <code class="text-amber-300">index.html</code>.</li>
-            <li>Added interactive <strong class="text-stone-100">Version History</strong> badge and release changelog modal.</li>
-            <li>Added dedicated <strong class="text-stone-100">Beat Vol</strong> slider and isolated Web Audio sub-mix gain bus for Samba accompaniment balancing.</li>
+            <li>Added quick <strong class="text-stone-100">Master Mute</strong> toggle in the top-left header with smooth Web Audio gain ramping.</li>
+            <li>Added ultra-lightweight <strong class="text-stone-100">Background Waveform Visualizer</strong> driven by a low-FFT (128-bin) <code class="text-amber-300">AnalyserNode</code> with automatic idle sleep.</li>
+          </ul>
+        </div>
+
+        <!-- v0.4 -->
+        <div class="p-3.5 rounded-2xl bg-stone-800/50 border border-stone-700/70 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-bold text-stone-200">v0.4 — Alpha Test Release</span>
+            <span class="text-[11px] font-mono text-stone-400">2026-11-18</span>
+          </div>
+          <ul class="text-xs text-stone-400 space-y-1 list-disc list-inside">
+            <li>Promoted build to <strong class="text-stone-300">Alpha Test</strong> and standardized entry point as <code class="text-stone-300">index.html</code>.</li>
+            <li>Added interactive <strong class="text-stone-300">Version History</strong> badge and release changelog modal.</li>
+            <li>Added dedicated <strong class="text-stone-300">Beat Vol</strong> slider and isolated Web Audio sub-mix gain bus.</li>
           </ul>
         </div>
 
@@ -158,13 +170,23 @@
 
   <!-- Top Control Bar -->
   <header class="flex items-center justify-between px-3 py-2 sm:px-5 sm:py-2.5 bg-stone-900/90 border-b border-stone-800/90 shrink-0 z-20 gap-2">
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-1.5 sm:gap-2">
+      <!-- Top-Left Mute Toggle -->
+      <button id="muteBtn" class="p-1.5 rounded-xl border border-stone-700 bg-stone-800/90 hover:border-amber-500/50 text-stone-200 transition flex items-center justify-center" title="Mute / Unmute Master Audio" aria-label="Toggle Mute">
+        <svg id="muteIconOn" class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" />
+        </svg>
+        <svg id="muteIconOff" class="w-4 h-4 text-rose-400 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6" />
+        </svg>
+      </button>
+
       <span class="font-extrabold tracking-tight text-amber-400 text-base sm:text-lg">CUÍCA</span>
       <button id="versionBadgeBtn" class="px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 transition flex items-center gap-1" title="View version history & release notes">
-        <span>v0.4</span>
+        <span>v0.4.1</span>
         <span class="hidden sm:inline text-amber-200/80">ALPHA</span>
       </button>
-      <button id="audioStatusBadge" class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-stone-800 border border-stone-700 text-stone-300">
+      <button id="audioStatusBadge" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-stone-800 border border-stone-700 text-stone-300">
         <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
         <span id="statusText">TAP TO START</span>
       </button>
@@ -237,10 +259,13 @@
   </div>
 
   <!-- Main Multi-Touch Performance Stage -->
-  <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+  <main class="flex-1 flex flex-col md:flex-row overflow-hidden relative bg-gradient-to-b from-stone-950 via-stone-900/80 to-stone-950">
+
+    <!-- Lightweight Background Waveform Visualizer Canvas -->
+    <canvas id="waveCanvas" class="absolute inset-0 w-full h-full pointer-events-none z-0 opacity-75"></canvas>
 
     <!-- Left / Top Zone: Goatskin Drumhead -->
-    <section class="relative flex-[1.15] md:flex-[1.2] flex flex-col border-b md:border-b-0 md:border-r border-stone-800/90 bg-gradient-to-b from-stone-950 to-stone-900/70 overflow-hidden">
+    <section class="relative z-10 flex-[1.15] md:flex-[1.2] flex flex-col border-b md:border-b-0 md:border-r border-stone-800/70 bg-transparent overflow-hidden">
       <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
         <span class="px-2.5 py-0.5 rounded-full bg-stone-900/80 border border-stone-700/70 text-[10px] font-bold tracking-wider uppercase text-emerald-300">
           1. Goatskin Head (Pitch &bull; Tap &bull; Pressure)
@@ -251,7 +276,7 @@
     </section>
 
     <!-- Right / Bottom Zone: Internal Bamboo Stick (Gambitto) -->
-    <section class="relative flex-1 flex flex-col bg-gradient-to-b from-stone-900/60 to-stone-950 overflow-hidden">
+    <section class="relative z-10 flex-1 flex flex-col bg-transparent overflow-hidden">
       <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
         <span class="px-2.5 py-0.5 rounded-full bg-stone-900/80 border border-stone-700/70 text-[10px] font-bold tracking-wider uppercase text-amber-300">
           2. Bamboo Stick / Gambitto (Rub Up &amp; Down)
@@ -268,7 +293,7 @@
   <script>
     /**
      * =========================================================================
-     * 1. HARMONIC SCALE & PITCH QUANTIZER (Inspired by Steve Kinney's Octavian)
+     * 1. HARMONIC SCALE & PITCH QUANTIZER
      * =========================================================================
      */
     const SambaScaleQuantizer = (() => {
@@ -528,7 +553,7 @@
 
     /**
      * =========================================================================
-     * 3. MASTER CUÍCA AUDIO ENGINE (Lifecycle, Beat Bus, Transient Cleanup)
+     * 3. MASTER CUÍCA AUDIO ENGINE (Mute Toggle, Low-CPU Analyser, Beat Bus)
      * =========================================================================
      */
     class CuicaAudioEngine {
@@ -537,10 +562,13 @@
         this.masterGain = null;
         this.beatGain = null;
         this.limiter = null;
+        this.analyser = null;
+        this.waveData = null;
         this.noiseBuffer = null;
         this.stickVoice = null;
         this.rumbleVoice = null;
         this.beatVolumeNorm = 0.75;
+        this.isMuted = false;
         this.isReady = false;
       }
 
@@ -600,18 +628,32 @@
         this.limiter.release.value = 0.08;
 
         this.masterGain = ctx.createGain();
-        this.masterGain.gain.value = 0.88;
+        this.masterGain.gain.value = this.isMuted ? 0.00001 : 0.88;
 
-        // Dedicated Samba accompaniment sub-mix bus with safe gain ramping
+        // Lightweight 128-bin AnalyserNode for low-overhead waveform rendering
+        this.analyser = ctx.createAnalyser();
+        this.analyser.fftSize = 128;
+        this.analyser.smoothingTimeConstant = 0.72;
+        this.waveData = new Uint8Array(this.analyser.frequencyBinCount);
+
+        // Dedicated Samba accompaniment sub-mix bus
         this.beatGain = ctx.createGain();
         this.beatGain.gain.value = clampSafe(this.beatVolumeNorm, 0.00001, 1.0, 0.75);
         this.beatGain.connect(this.limiter);
 
         this.limiter.connect(this.masterGain);
-        this.masterGain.connect(ctx.destination);
+        this.masterGain.connect(this.analyser);
+        this.analyser.connect(ctx.destination);
 
         this.stickVoice = new StickSlipVoice(ctx, this.limiter, this.noiseBuffer);
         this.rumbleVoice = new SkinRumbleVoice(ctx, this.limiter, this.noiseBuffer);
+      }
+
+      setMuted(muted) {
+        this.isMuted = Boolean(muted);
+        if (!this.isReady || !this.ctx || !this.masterGain) return;
+        const target = this.isMuted ? 0.00001 : 0.88;
+        scheduleSafeGain(this.masterGain.gain, target, this.ctx.currentTime, 0.02);
       }
 
       setBeatVolume(norm) {
@@ -619,6 +661,14 @@
         if (!this.isReady || !this.ctx || !this.beatGain) return;
         const curved = Math.pow(this.beatVolumeNorm, 1.5);
         scheduleSafeGain(this.beatGain.gain, curved, this.ctx.currentTime, 0.025);
+      }
+
+      getWaveformSamples() {
+        if (!this.isReady || !this.analyser || !this.waveData || this.isMuted) {
+          return null;
+        }
+        this.analyser.getByteTimeDomainData(this.waveData);
+        return this.waveData;
       }
 
       updatePerformance({ freq, stickVel, pressure, dragVel, direction, clothGrip }) {
@@ -741,6 +791,7 @@
 
     const state = {
       audioStarted: false,
+      isMuted: false,
       tuningIdx: 0,
       scaleLock: false,
       clothGrip: 0.72,
@@ -767,7 +818,10 @@
       stickTouch: null,
       smoothedStickVel: 0,
       stickDirection: 1,
-      stickVisualOffset: 0
+      stickVisualOffset: 0,
+
+      // Waveform idle optimization
+      waveNeedsClear: true
     };
 
     // DOM Elements
@@ -777,6 +831,10 @@
     const audioStatusBadge = document.getElementById("audioStatusBadge");
     const statusDot = document.getElementById("statusDot");
     const statusText = document.getElementById("statusText");
+
+    const muteBtn = document.getElementById("muteBtn");
+    const muteIconOn = document.getElementById("muteIconOn");
+    const muteIconOff = document.getElementById("muteIconOff");
 
     const versionBadgeBtn = document.getElementById("versionBadgeBtn");
     const versionModal = document.getElementById("versionModal");
@@ -809,10 +867,43 @@
     const pressureReadout = document.getElementById("pressureReadout");
     const velocityReadout = document.getElementById("velocityReadout");
 
+    const waveCanvas = document.getElementById("waveCanvas");
+    const waveCtx = waveCanvas.getContext("2d", { alpha: true });
     const drumCanvas = document.getElementById("drumCanvas");
     const drumCtx = drumCanvas.getContext("2d");
     const stickCanvas = document.getElementById("stickCanvas");
     const stickCtx = stickCanvas.getContext("2d");
+
+    // Mute Toggle Handler
+    function updateMuteUI() {
+      if (state.isMuted) {
+        muteIconOn.classList.add("hidden");
+        muteIconOff.classList.remove("hidden");
+        muteBtn.classList.add("border-rose-500/60", "bg-rose-950/50");
+        muteBtn.classList.remove("border-stone-700", "bg-stone-800/90");
+        if (state.audioStarted) {
+          statusDot.className = "w-2 h-2 rounded-full bg-rose-500";
+          statusText.textContent = "MUTED";
+        }
+      } else {
+        muteIconOn.classList.remove("hidden");
+        muteIconOff.classList.add("hidden");
+        muteBtn.classList.remove("border-rose-500/60", "bg-rose-950/50");
+        muteBtn.classList.add("border-stone-700", "bg-stone-800/90");
+        if (state.audioStarted && engine.ctx) {
+          statusDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+          statusText.textContent = `LIVE (${Math.round(engine.ctx.sampleRate / 1000)}kHz)`;
+        }
+      }
+    }
+
+    muteBtn.addEventListener("pointerdown", () => {
+      if (!state.audioStarted) activateAudio();
+      state.isMuted = !state.isMuted;
+      engine.setMuted(state.isMuted);
+      state.waveNeedsClear = true;
+      updateMuteUI();
+    });
 
     // Version History Modal Handlers
     function openVersionModal() {
@@ -833,11 +924,10 @@
       if (res.ok) {
         state.audioStarted = true;
         engine.setBeatVolume(state.beatVolume);
+        engine.setMuted(state.isMuted);
         startOverlay.classList.add("opacity-0", "pointer-events-none");
-        statusDot.classList.remove("bg-amber-500", "animate-pulse");
-        statusDot.classList.add("bg-emerald-400");
-        statusText.textContent = `LIVE (${Math.round(res.sampleRate / 1000)}kHz)`;
         audioStatusBadge.classList.replace("border-stone-700", "border-emerald-500/40");
+        updateMuteUI();
       } else {
         audioErrorMsg.textContent = "Audio Error: " + res.error;
         audioErrorMsg.classList.remove("hidden");
@@ -1153,7 +1243,7 @@
 
     /**
      * =========================================================================
-     * 5. FIXED-CADENCE PHYSICS, LOOPER PLAYBACK & CANVAS RENDERING LOOP
+     * 5. FIXED-CADENCE PHYSICS, LOOPER PLAYBACK & LOW-CPU CANVAS RENDERING
      * =========================================================================
      */
     function resizeCanvases() {
@@ -1164,6 +1254,13 @@
           canvas.width = Math.round(rect.width * dpr);
           canvas.height = Math.round(rect.height * dpr);
         }
+      }
+      // Keep background waveform canvas at 1x CSS resolution for maximum FPS & minimal GPU fill cost
+      const waveRect = waveCanvas.getBoundingClientRect();
+      if (waveRect.width > 0 && waveRect.height > 0) {
+        waveCanvas.width = Math.round(waveRect.width);
+        waveCanvas.height = Math.round(waveRect.height);
+        state.waveNeedsClear = true;
       }
     }
     window.addEventListener("resize", resizeCanvases);
@@ -1275,11 +1372,93 @@
       pressureReadout.textContent = `${Math.round(outPressure * 100)}%`;
       velocityReadout.textContent = `${Math.round(outStickVel * 100)}%`;
 
-      // 7. Render canvases
+      // 7. Render canvases (background waveform sleeps automatically when silent)
+      renderBackgroundWaveform();
       renderDrumhead(now, outStickVel);
       renderBambooStick(now, outStickVel);
 
       requestAnimationFrame(frameLoop);
+    }
+
+    /**
+     * Ultra-lightweight background oscilloscope (64 samples, 1x DPR, auto-sleeps on silence)
+     */
+    function renderBackgroundWaveform() {
+      const w = waveCanvas.width;
+      const h = waveCanvas.height;
+      if (w === 0 || h === 0) return;
+
+      const samples = engine.getWaveformSamples();
+      if (!samples) {
+        if (state.waveNeedsClear) {
+          waveCtx.clearRect(0, 0, w, h);
+          // Draw subtle static baseline
+          waveCtx.strokeStyle = "rgba(245, 158, 11, 0.08)";
+          waveCtx.lineWidth = 1.5;
+          waveCtx.beginPath();
+          waveCtx.moveTo(0, h * 0.5);
+          waveCtx.lineTo(w, h * 0.5);
+          waveCtx.stroke();
+          state.waveNeedsClear = false;
+        }
+        return;
+      }
+
+      // Check peak deviation from center (128) to skip drawing when signal is silent
+      let peak = 0;
+      const len = samples.length;
+      for (let i = 0; i < len; i += 2) {
+        const diff = Math.abs(samples[i] - 128);
+        if (diff > peak) peak = diff;
+      }
+
+      if (peak < 1) {
+        if (state.waveNeedsClear) {
+          waveCtx.clearRect(0, 0, w, h);
+          waveCtx.strokeStyle = "rgba(245, 158, 11, 0.08)";
+          waveCtx.lineWidth = 1.5;
+          waveCtx.beginPath();
+          waveCtx.moveTo(0, h * 0.5);
+          waveCtx.lineTo(w, h * 0.5);
+          waveCtx.stroke();
+          state.waveNeedsClear = false;
+        }
+        return;
+      }
+
+      state.waveNeedsClear = true;
+      waveCtx.clearRect(0, 0, w, h);
+
+      const midY = h * 0.5;
+      const ampScale = h * 0.42;
+      const sliceW = w / (len - 1);
+
+      // Single crisp path with zero shadowBlur overhead
+      waveCtx.lineWidth = 2;
+      waveCtx.strokeStyle = "rgba(245, 158, 11, 0.24)";
+      waveCtx.beginPath();
+
+      for (let i = 0; i < len; i++) {
+        const norm = (samples[i] - 128) / 128;
+        const x = i * sliceW;
+        const y = midY + norm * ampScale;
+        if (i === 0) waveCtx.moveTo(x, y);
+        else waveCtx.lineTo(x, y);
+      }
+      waveCtx.stroke();
+
+      // Secondary harmonic echo line
+      waveCtx.lineWidth = 1;
+      waveCtx.strokeStyle = "rgba(16, 185, 129, 0.14)";
+      waveCtx.beginPath();
+      for (let i = 0; i < len; i++) {
+        const norm = (samples[i] - 128) / 128;
+        const x = i * sliceW;
+        const y = midY - norm * ampScale * 0.65;
+        if (i === 0) waveCtx.moveTo(x, y);
+        else waveCtx.lineTo(x, y);
+      }
+      waveCtx.stroke();
     }
 
     function renderDrumhead(now, activeVel) {
